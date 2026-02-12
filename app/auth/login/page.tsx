@@ -16,24 +16,41 @@ export default function LoginPage() {
   const [error, setError] = useState("")
   const [loading, setLoading] = useState(false)
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
     setError("")
 
-    // Simulamos validación
+    // Validacion basica
     if (!email || !password) {
       setError("Por favor completa todos los campos")
       setLoading(false)
       return
     }
 
-    // Simulamos login exitoso
-    setTimeout(() => {
-      localStorage.setItem("user", JSON.stringify({ email, id: Date.now() }))
-      router.push("/")
-      setLoading(false)
-    }, 800)
+    try {
+      const res = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.message || 'Error al iniciar sesión');
+      }
+
+      // Success
+      localStorage.setItem("user", JSON.stringify(data.user));
+      router.push("/");
+    } catch (err: any) {
+      setError(err.message || "Credenciales incorrectas o error de servidor");
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (

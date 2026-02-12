@@ -35,7 +35,7 @@ export default function RegisterPage() {
     setFormData((prev) => ({ ...prev, [name]: value }))
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
     setError("")
@@ -58,18 +58,33 @@ export default function RegisterPage() {
       return
     }
 
-    setTimeout(() => {
-      localStorage.setItem(
-        "user",
-        JSON.stringify({
+    try {
+      const res = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
           name: formData.name,
           email: formData.email,
-          id: Date.now(),
+          password: formData.password,
         }),
-      )
-      router.push("/")
-      setLoading(false)
-    }, 800)
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.message || 'Error al registrar el usuario');
+      }
+
+      // Success
+      localStorage.setItem("user", JSON.stringify(data.user));
+      router.push("/");
+    } catch (err: any) {
+      setError(err.message || "Ocurrió un error inesperado.");
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
