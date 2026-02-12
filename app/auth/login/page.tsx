@@ -120,12 +120,13 @@ export default function LoginPage() {
         </form>
 
         {/* Link to register */}
-        <p className="text-center text-sm text-muted-foreground mt-4">
+        {/* Link to register removed to restrict access */}
+        {/* <p className="text-center text-sm text-muted-foreground mt-4">
           ¿No tienes cuenta?{" "}
           <Link href="/auth/register" className="text-accent font-semibold hover:underline">
             Crear cuenta
           </Link>
-        </p>
+        </p> */}
       </div>
     </div>
   )
