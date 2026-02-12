@@ -11,7 +11,7 @@ import { useArticles, type Article } from "@/lib/articles-context"
 export default function EditarArticuloPage() {
   const router = useRouter()
   const params = useParams()
-  const articleId = Number(params.id)
+  const articleId = params.id as string
   const { getArticleById, updateArticle } = useArticles()
 
   const [user, setUser] = useState<any>(null)

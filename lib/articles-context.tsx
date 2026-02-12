@@ -5,7 +5,7 @@ import type React from "react"
 import { createContext, useContext, useState, useEffect } from "react"
 
 export interface Article {
-  id: number
+  id: string | number
   title: string
   description: string
   category: string
@@ -16,65 +16,83 @@ export interface Article {
 
 interface ArticlesContextType {
   articles: Article[]
-  addArticle: (article: Article) => void
-  updateArticle: (id: number, article: Article) => void
-  deleteArticle: (id: number) => void
-  getArticleById: (id: number) => Article | undefined
+  addArticle: (article: Omit<Article, 'id'>) => Promise<void>
+  updateArticle: (id: string | number, article: Article) => Promise<void>
+  deleteArticle: (id: string | number) => Promise<void>
+  getArticleById: (id: string | number) => Article | undefined
 }
 
 const ArticlesContext = createContext<ArticlesContextType | undefined>(undefined)
 
 export function ArticlesProvider({ children }: { children: React.ReactNode }) {
-  const [articles, setArticles] = useState<Article[]>([
-    {
-      id: 1,
-      title: "Bicicleta de Montaña",
-      description: "Bicicleta en excelente estado",
-      category: "deportes",
-      condition: "como-nueva",
-      wantsFor: "Patineta",
-      image: "/mountain-bike.jpg",
-    },
-    {
-      id: 2,
-      title: "Auriculares Gaming",
-      description: "Auriculares con micrófono integrado",
-      category: "electronica",
-      condition: "buen-estado",
-      wantsFor: "Micrófono",
-      image: "/gaming-headphones.jpg",
-    },
-  ])
+  const [articles, setArticles] = useState<Article[]>([])
+
+  const fetchArticles = async () => {
+    try {
+      const res = await fetch('/api/articles')
+      if (res.ok) {
+        const data = await res.json()
+        setArticles(data)
+      } else {
+        console.error('[SWAPPLY] Error fetching articles')
+      }
+    } catch (error) {
+      console.error('[SWAPPLY] Error fetching articles', error)
+    }
+  }
 
   useEffect(() => {
-    const stored = localStorage.getItem("swapply_articles")
-    if (stored) {
-      try {
-        setArticles(JSON.parse(stored))
-      } catch {
-        console.log("[v0] Error al cargar artículos")
-      }
-    }
+    fetchArticles()
   }, [])
 
-  useEffect(() => {
-    localStorage.setItem("swapply_articles", JSON.stringify(articles))
-  }, [articles])
-
-  const addArticle = (article: Article) => {
-    const newArticle = { ...article, id: Date.now() }
-    setArticles([...articles, newArticle])
+  const addArticle = async (article: Omit<Article, 'id'>) => {
+    try {
+      const res = await fetch('/api/articles', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(article),
+      })
+      if (res.ok) {
+        await fetchArticles() // Refresh list
+      }
+    } catch (error) {
+      console.error('[SWAPPLY] Error adding article', error)
+    }
   }
 
-  const updateArticle = (id: number, updatedArticle: Article) => {
-    setArticles(articles.map((a) => (a.id === id ? { ...updatedArticle, id } : a)))
+  const updateArticle = async (id: string | number, updatedArticle: Article) => {
+    try {
+      const res = await fetch(`/api/articles/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(updatedArticle),
+      })
+      if (res.ok) {
+        await fetchArticles() // Refresh list
+      }
+    } catch (error) {
+      console.error('[SWAPPLY] Error updating article', error)
+    }
   }
 
-  const deleteArticle = (id: number) => {
-    setArticles(articles.filter((a) => a.id !== id))
+  const deleteArticle = async (id: string | number) => {
+    try {
+      const res = await fetch(`/api/articles/${id}`, {
+        method: 'DELETE',
+      })
+      if (res.ok) {
+        await fetchArticles() // Refresh list
+      }
+    } catch (error) {
+      console.error('[SWAPPLY] Error deleting article', error)
+    }
   }
 
-  const getArticleById = (id: number) => {
+  const getArticleById = (id: string | number) => {
     return articles.find((a) => a.id === id)
   }
 

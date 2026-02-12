@@ -50,12 +50,11 @@ export default function PublicarPage() {
     }
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
 
-    addArticle({
-      id: Date.now(),
+    await addArticle({
       title: formData.title,
       description: formData.description,
       category: formData.category,
@@ -64,10 +63,8 @@ export default function PublicarPage() {
       image: formData.image || "/placeholder.svg",
     })
 
-    setTimeout(() => {
-      router.push("/mis-articulos")
-      setLoading(false)
-    }, 800)
+    router.push("/mis-articulos")
+    setLoading(false)
   }
 
   if (!user) {

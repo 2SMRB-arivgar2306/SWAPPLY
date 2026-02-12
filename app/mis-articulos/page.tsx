@@ -21,13 +21,13 @@ export default function MisArticulosPage() {
     }
   }, [router])
 
-  const handleDelete = (id: number) => {
+  const handleDelete = (id: string | number) => {
     if (confirm("¿Estás seguro de que quieres eliminar este artículo?")) {
       deleteArticle(id)
     }
   }
 
-  const handleEdit = (id: number) => {
+  const handleEdit = (id: string | number) => {
     router.push(`/editar-articulo/${id}`)
   }
 
