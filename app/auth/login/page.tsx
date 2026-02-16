@@ -119,14 +119,12 @@ export default function LoginPage() {
           </button>
         </form>
 
-        {/* Link to register */}
-        {/* Link to register removed to restrict access */}
-        {/* <p className="text-center text-sm text-muted-foreground mt-4">
+        <p className="text-center text-sm text-muted-foreground mt-4">
           ¿No tienes cuenta?{" "}
           <Link href="/auth/register" className="text-accent font-semibold hover:underline">
             Crear cuenta
           </Link>
-        </p> */}
+        </p>
       </div>
     </div>
   )

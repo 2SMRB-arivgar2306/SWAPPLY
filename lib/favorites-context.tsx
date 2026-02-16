@@ -2,10 +2,10 @@
 
 import type React from "react"
 
-import { createContext, useContext, useState, useEffect } from "react"
+import { createContext, useContext, useState, useEffect, useCallback } from "react"
 
 interface Favorite {
-  id: number
+  id: number | string
   title: string
   image: string
   condition: string
@@ -18,43 +18,99 @@ interface Favorite {
 interface FavoritesContextType {
   favorites: Favorite[]
   addFavorite: (product: Favorite) => void
-  removeFavorite: (id: number) => void
-  isFavorite: (id: number) => boolean
+  removeFavorite: (id: number | string) => void
+  isFavorite: (id: number | string) => boolean
 }
 
 const FavoritesContext = createContext<FavoritesContextType | undefined>(undefined)
 
 export function FavoritesProvider({ children }: { children: React.ReactNode }) {
   const [favorites, setFavorites] = useState<Favorite[]>([])
+  const [userId, setUserId] = useState<string | null>(null)
 
   useEffect(() => {
-    const stored = localStorage.getItem("swapply_favorites")
+    const stored = localStorage.getItem("user")
     if (stored) {
       try {
-        setFavorites(JSON.parse(stored))
+        const user = JSON.parse(stored)
+        setUserId(user.id)
       } catch {
-        console.log("[v0] Error al cargar favoritos")
+        console.log("[SWAPPLY] Error reading user from localStorage")
       }
     }
   }, [])
 
   useEffect(() => {
-    localStorage.setItem("swapply_favorites", JSON.stringify(favorites))
-  }, [favorites])
+    if (userId) {
+      fetchFavorites()
+    }
+  }, [userId])
 
-  const addFavorite = (product: Favorite) => {
-    if (!isFavorite(product.id)) {
-      setFavorites([...favorites, product])
+  const fetchFavorites = async () => {
+    if (!userId) return
+    try {
+      const res = await fetch(`/api/favorites?userId=${userId}`)
+      if (res.ok) {
+        const data = await res.json()
+        setFavorites(data)
+      }
+    } catch (error) {
+      console.error("[SWAPPLY] Error fetching favorites:", error)
     }
   }
 
-  const removeFavorite = (id: number) => {
-    setFavorites(favorites.filter((fav) => fav.id !== id))
-  }
+  const addFavorite = useCallback(async (product: Favorite) => {
+    if (!userId) return
+    // Optimistic update
+    setFavorites((prev) => {
+      if (prev.some((fav) => String(fav.id) === String(product.id))) return prev
+      return [...prev, product]
+    })
 
-  const isFavorite = (id: number) => {
-    return favorites.some((fav) => fav.id === id)
-  }
+    try {
+      await fetch("/api/favorites", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          userId,
+          articleId: String(product.id),
+          title: product.title,
+          image: product.image,
+          condition: product.condition,
+          category: product.category,
+          seeking: product.seeking,
+          user: product.user,
+          location: product.location,
+        }),
+      })
+    } catch (error) {
+      console.error("[SWAPPLY] Error adding favorite:", error)
+      // Rollback on error
+      setFavorites((prev) => prev.filter((fav) => String(fav.id) !== String(product.id)))
+    }
+  }, [userId])
+
+  const removeFavorite = useCallback(async (id: number | string) => {
+    if (!userId) return
+    const prevFavorites = favorites
+
+    // Optimistic update
+    setFavorites((prev) => prev.filter((fav) => String(fav.id) !== String(id)))
+
+    try {
+      await fetch(`/api/favorites?userId=${userId}&articleId=${String(id)}`, {
+        method: "DELETE",
+      })
+    } catch (error) {
+      console.error("[SWAPPLY] Error removing favorite:", error)
+      // Rollback on error
+      setFavorites(prevFavorites)
+    }
+  }, [userId, favorites])
+
+  const isFavorite = useCallback((id: number | string) => {
+    return favorites.some((fav) => String(fav.id) === String(id))
+  }, [favorites])
 
   return (
     <FavoritesContext.Provider value={{ favorites, addFavorite, removeFavorite, isFavorite }}>

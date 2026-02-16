@@ -12,11 +12,12 @@ export default function EditarArticuloPage() {
   const router = useRouter()
   const params = useParams()
   const articleId = params.id as string
-  const { getArticleById, updateArticle } = useArticles()
+  const { updateArticle } = useArticles()
 
   const [user, setUser] = useState<any>(null)
   const [formData, setFormData] = useState<Article | null>(null)
   const [loading, setLoading] = useState(false)
+  const [error, setError] = useState("")
 
   useEffect(() => {
     const storedUser = localStorage.getItem("user")
@@ -24,15 +25,24 @@ export default function EditarArticuloPage() {
       setUser(JSON.parse(storedUser))
     } else {
       router.push("/auth/login")
+      return
     }
 
-    const article = getArticleById(articleId)
-    if (article) {
-      setFormData(article)
-    } else {
-      router.push("/mis-articulos")
+    const loadArticle = async () => {
+      try {
+        const res = await fetch(`/api/articles/${articleId}`)
+        if (!res.ok) {
+          throw new Error("No se pudo cargar el artículo")
+        }
+        const article = await res.json()
+        setFormData(article)
+      } catch {
+        router.push("/mis-articulos")
+      }
     }
-  }, [router, articleId, getArticleById])
+
+    loadArticle()
+  }, [router, articleId])
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     if (formData) {
@@ -41,17 +51,29 @@ export default function EditarArticuloPage() {
     }
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!formData) return
 
     setLoading(true)
-    updateArticle(articleId, formData)
+    setError("")
 
-    setTimeout(() => {
+    const saved = await updateArticle(articleId, {
+      title: formData.title,
+      description: formData.description,
+      category: formData.category,
+      condition: formData.condition,
+      wantsFor: formData.wantsFor,
+      image: formData.image,
+    })
+
+    if (saved) {
       router.push("/mis-articulos")
-      setLoading(false)
-    }, 800)
+    } else {
+      setError("No se pudo guardar el artículo en la base de datos")
+    }
+
+    setLoading(false)
   }
 
   if (!user || !formData) {
@@ -72,6 +94,10 @@ export default function EditarArticuloPage() {
         </button>
 
         <h1 className="text-3xl font-bold text-foreground mb-6">Editar artículo</h1>
+
+        {error && (
+          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-4 text-sm">{error}</div>
+        )}
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>

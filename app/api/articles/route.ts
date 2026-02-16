@@ -8,12 +8,15 @@ export async function GET() {
     try {
         await connectToDatabase();
 
-        // Mapping _id to id for frontend compatibility if needed
-        // We can do this in the frontend or backend. Doing it here for clarity.
-        const articles = await Article.find({}).sort({ createdAt: -1 });
+        const articles = await Article.find({})
+            .populate('userId', 'name location')
+            .sort({ createdAt: -1 });
 
         const formattedArticles = articles.map(article => ({
-            id: article._id,
+            id: article._id.toString(),
+            userId: article.userId?._id?.toString ? article.userId._id.toString() : (article.userId ? article.userId.toString() : ''),
+            user: article.userId?.name || 'Usuario',
+            location: article.userId?.location || 'Sin ubicación',
             title: article.title,
             description: article.description,
             category: article.category,
@@ -24,7 +27,7 @@ export async function GET() {
 
         return NextResponse.json(formattedArticles, { status: 200 });
     } catch (error) {
-        console.error('Detailed Error fetching articles:', error);
+        console.error('Error fetching articles:', error);
         return NextResponse.json(
             { message: 'Error fetching articles', error: error instanceof Error ? error.message : String(error) },
             { status: 500 }
@@ -37,11 +40,32 @@ export async function POST(req: Request) {
         await connectToDatabase();
         const body = await req.json();
 
-        // Basic validation could go here, relying on Mongoose schema mostly
+        if (!body.title || !body.description || !body.category || !body.condition || !body.wantsFor) {
+            return NextResponse.json(
+                { message: 'Faltan campos obligatorios del artículo.' },
+                { status: 400 }
+            );
+        }
+
         const newArticle = await Article.create(body);
+        const populated = await newArticle.populate('userId', 'name location');
 
         return NextResponse.json(
-            { message: 'Article created successfully', article: newArticle },
+            {
+                message: 'Article created successfully',
+                article: {
+                    id: populated._id.toString(),
+                    userId: populated.userId?._id?.toString ? populated.userId._id.toString() : (populated.userId ? populated.userId.toString() : ''),
+                    user: populated.userId?.name || 'Usuario',
+                    location: populated.userId?.location || 'Sin ubicación',
+                    title: populated.title,
+                    description: populated.description,
+                    category: populated.category,
+                    condition: populated.condition,
+                    wantsFor: populated.wantsFor,
+                    image: populated.image,
+                }
+            },
             { status: 201 }
         );
     } catch (error) {

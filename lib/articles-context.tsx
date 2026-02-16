@@ -16,9 +16,9 @@ export interface Article {
 
 interface ArticlesContextType {
   articles: Article[]
-  addArticle: (article: Omit<Article, 'id'>) => Promise<void>
-  updateArticle: (id: string | number, article: Article) => Promise<void>
-  deleteArticle: (id: string | number) => Promise<void>
+  addArticle: (article: Omit<Article, 'id'> & { userId?: string }) => Promise<boolean>
+  updateArticle: (id: string | number, article: Partial<Article>) => Promise<boolean>
+  deleteArticle: (id: string | number) => Promise<boolean>
   getArticleById: (id: string | number) => Article | undefined
 }
 
@@ -34,11 +34,10 @@ export function ArticlesProvider({ children }: { children: React.ReactNode }) {
         const data = await res.json()
         setArticles(data)
       } else {
-        const errorData = await res.json().catch(() => ({}));
-        console.error('[SWAPPLY] Error fetching articles. Status:', res.status, 'Data:', errorData)
+        console.error('[SWAPPLY] Error fetching articles')
       }
     } catch (error) {
-      console.error('[SWAPPLY] Network/Client Error fetching articles:', error)
+      console.error('[SWAPPLY] Error fetching articles', error)
     }
   }
 
@@ -46,7 +45,7 @@ export function ArticlesProvider({ children }: { children: React.ReactNode }) {
     fetchArticles()
   }, [])
 
-  const addArticle = async (article: Omit<Article, 'id'>) => {
+  const addArticle = async (article: Omit<Article, 'id'> & { userId?: string }) => {
     try {
       const res = await fetch('/api/articles', {
         method: 'POST',
@@ -57,13 +56,16 @@ export function ArticlesProvider({ children }: { children: React.ReactNode }) {
       })
       if (res.ok) {
         await fetchArticles() // Refresh list
+        return true
       }
+      return false
     } catch (error) {
       console.error('[SWAPPLY] Error adding article', error)
+      return false
     }
   }
 
-  const updateArticle = async (id: string | number, updatedArticle: Article) => {
+  const updateArticle = async (id: string | number, updatedArticle: Partial<Article>) => {
     try {
       const res = await fetch(`/api/articles/${id}`, {
         method: 'PUT',
@@ -74,9 +76,12 @@ export function ArticlesProvider({ children }: { children: React.ReactNode }) {
       })
       if (res.ok) {
         await fetchArticles() // Refresh list
+        return true
       }
+      return false
     } catch (error) {
       console.error('[SWAPPLY] Error updating article', error)
+      return false
     }
   }
 
@@ -87,9 +92,12 @@ export function ArticlesProvider({ children }: { children: React.ReactNode }) {
       })
       if (res.ok) {
         await fetchArticles() // Refresh list
+        return true
       }
+      return false
     } catch (error) {
       console.error('[SWAPPLY] Error deleting article', error)
+      return false
     }
   }
 

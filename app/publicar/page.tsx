@@ -22,6 +22,7 @@ export default function PublicarPage() {
   })
   const [imagePreview, setImagePreview] = useState<string>("")
   const [loading, setLoading] = useState(false)
+  const [error, setError] = useState("")
 
   useEffect(() => {
     const storedUser = localStorage.getItem("user")
@@ -52,9 +53,16 @@ export default function PublicarPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setLoading(true)
+    if (!user?.id) {
+      setError("Debes iniciar sesión para publicar")
+      return
+    }
 
-    await addArticle({
+    setLoading(true)
+    setError("")
+
+    const saved = await addArticle({
+      userId: user.id,
       title: formData.title,
       description: formData.description,
       category: formData.category,
@@ -63,7 +71,12 @@ export default function PublicarPage() {
       image: formData.image || "/placeholder.svg",
     })
 
-    router.push("/mis-articulos")
+    if (saved) {
+      router.push("/mis-articulos")
+    } else {
+      setError("No se pudo guardar el artículo en la base de datos")
+    }
+
     setLoading(false)
   }
 
@@ -85,6 +98,10 @@ export default function PublicarPage() {
         </button>
 
         <h1 className="text-3xl font-bold text-foreground mb-6">Publicar artículo</h1>
+
+        {error && (
+          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-4 text-sm">{error}</div>
+        )}
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>

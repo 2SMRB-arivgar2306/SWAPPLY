@@ -44,9 +44,11 @@ export async function POST(req: Request) {
             {
                 message: 'Login exitoso',
                 user: {
-                    id: user._id,
+                    id: user._id.toString(),
                     name: user.name,
                     email: user.email,
+                    bio: user.bio || '',
+                    location: user.location || '',
                 },
             },
             { status: 200 }

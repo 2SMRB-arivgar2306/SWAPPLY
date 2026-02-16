@@ -10,7 +10,7 @@ export async function GET(
 ) {
     try {
         await connectToDatabase();
-        const article = await Article.findById(params.id);
+        const article = await Article.findById(params.id).populate('userId', 'name location');
 
         if (!article) {
             return NextResponse.json(
@@ -20,7 +20,10 @@ export async function GET(
         }
 
         return NextResponse.json({
-            id: article._id,
+            id: article._id.toString(),
+            userId: article.userId?._id?.toString ? article.userId._id.toString() : (article.userId ? article.userId.toString() : ''),
+            user: article.userId?.name || 'Usuario',
+            location: article.userId?.location || 'Sin ubicación',
             title: article.title,
             description: article.description,
             category: article.category,
@@ -48,7 +51,7 @@ export async function PUT(
         const updatedArticle = await Article.findByIdAndUpdate(params.id, body, {
             new: true,
             runValidators: true,
-        });
+        }).populate('userId', 'name location');
 
         if (!updatedArticle) {
             return NextResponse.json(
@@ -58,7 +61,21 @@ export async function PUT(
         }
 
         return NextResponse.json(
-            { message: 'Article updated successfully', article: updatedArticle },
+            {
+                message: 'Article updated successfully',
+                article: {
+                    id: updatedArticle._id.toString(),
+                    userId: updatedArticle.userId?._id?.toString ? updatedArticle.userId._id.toString() : (updatedArticle.userId ? updatedArticle.userId.toString() : ''),
+                    user: updatedArticle.userId?.name || 'Usuario',
+                    location: updatedArticle.userId?.location || 'Sin ubicación',
+                    title: updatedArticle.title,
+                    description: updatedArticle.description,
+                    category: updatedArticle.category,
+                    condition: updatedArticle.condition,
+                    wantsFor: updatedArticle.wantsFor,
+                    image: updatedArticle.image,
+                }
+            },
             { status: 200 }
         );
     } catch (error) {
