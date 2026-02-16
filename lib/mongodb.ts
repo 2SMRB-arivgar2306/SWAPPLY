@@ -23,6 +23,7 @@ async function connectToDatabase() {
     }
 
     if (cached.conn) {
+        // console.log('Using cached database connection');
         return cached.conn;
     }
 
@@ -31,14 +32,20 @@ async function connectToDatabase() {
             bufferCommands: false,
         };
 
+        console.log('Connecting to MongoDB...');
         cached.promise = mongoose.connect(MONGODB_URI!, opts).then((mongoose) => {
+            console.log('Successfully connected to MongoDB');
             return mongoose;
+        }).catch((error) => {
+            console.error('Error connecting to MongoDB:', error);
+            throw error;
         });
     }
     try {
         cached.conn = await cached.promise;
     } catch (e) {
         cached.promise = null;
+        console.error('Error awaiting database connection:', e);
         throw e;
     }
 

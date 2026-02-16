@@ -24,7 +24,7 @@ export async function GET() {
 
         return NextResponse.json(formattedArticles, { status: 200 });
     } catch (error) {
-        console.error('Error fetching articles:', error);
+        console.error('Detailed Error fetching articles:', error);
         return NextResponse.json(
             { message: 'Error fetching articles', error: error instanceof Error ? error.message : String(error) },
             { status: 500 }

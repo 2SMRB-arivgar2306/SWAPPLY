@@ -34,10 +34,11 @@ export function ArticlesProvider({ children }: { children: React.ReactNode }) {
         const data = await res.json()
         setArticles(data)
       } else {
-        console.error('[SWAPPLY] Error fetching articles')
+        const errorData = await res.json().catch(() => ({}));
+        console.error('[SWAPPLY] Error fetching articles. Status:', res.status, 'Data:', errorData)
       }
     } catch (error) {
-      console.error('[SWAPPLY] Error fetching articles', error)
+      console.error('[SWAPPLY] Network/Client Error fetching articles:', error)
     }
   }
 
