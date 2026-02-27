@@ -66,6 +66,7 @@ export default function EditarPerfilPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           name: formData.name,
+          email: formData.email,
           bio: formData.bio,
           location: formData.location,
         }),
@@ -83,6 +84,7 @@ export default function EditarPerfilPage() {
       localStorage.setItem("user", JSON.stringify({
         ...storedUser,
         name: updatedUser.name,
+        email: updatedUser.email,
         bio: updatedUser.bio,
         location: updatedUser.location,
       }))
@@ -149,8 +151,7 @@ export default function EditarPerfilPage() {
               name="email"
               value={formData.email}
               onChange={handleChange}
-              disabled
-              className="w-full px-4 py-3 bg-card border border-border rounded-lg opacity-50 cursor-not-allowed"
+              className="w-full px-4 py-3 bg-card border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-accent transition-colors"
             />
           </div>
 

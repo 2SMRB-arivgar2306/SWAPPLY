@@ -43,9 +43,10 @@ export async function PUT(
         await connectToDatabase();
         const body = await request.json();
 
-        // Only allow updating name, bio, location
+        // Only allow updating name, email, bio, location
         const updateData: any = {};
         if (body.name !== undefined) updateData.name = body.name;
+        if (body.email !== undefined) updateData.email = body.email;
         if (body.bio !== undefined) updateData.bio = body.bio;
         if (body.location !== undefined) updateData.location = body.location;
 

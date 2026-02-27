@@ -33,7 +33,7 @@ export default function Header() {
           </Link>
 
           <div className="flex items-center gap-6">
-            <Link href="/" className="text-foreground hover:text-accent transition-colors">
+            <Link href="/favorites" className="text-foreground hover:text-accent transition-colors">
               <Heart size={20} />
             </Link>
             <Link href="/chats" className="text-foreground hover:text-accent transition-colors">
