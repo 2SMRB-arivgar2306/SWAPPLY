@@ -27,7 +27,6 @@ export default function ProductCard({ product }) {
       })
     }
     setIsFav(!isFav)
-    router.push("/favorites")
   }
 
   const handleContact = () => {

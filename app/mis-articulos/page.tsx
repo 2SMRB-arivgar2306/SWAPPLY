@@ -35,6 +35,8 @@ export default function MisArticulosPage() {
     return null
   }
 
+  const userArticles = articles.filter(article => String((article as any).userId) === String(user.id))
+
   return (
     <main className="min-h-screen bg-background pb-16 md:pb-0 md:ml-16">
       <Navigation />
@@ -42,11 +44,11 @@ export default function MisArticulosPage() {
 
       <div className="max-w-7xl mx-auto px-4 py-8">
         <h1 className="text-3xl font-bold text-foreground mb-2">Mis Artículos</h1>
-        <p className="text-muted-foreground mb-8">{articles.length} artículos publicados</p>
+        <p className="text-muted-foreground mb-8">{userArticles.length} artículos publicados</p>
 
-        {articles.length > 0 ? (
+        {userArticles.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {articles.map((article) => (
+            {userArticles.map((article) => (
               <div key={article.id} className="bg-card border border-border rounded-xl overflow-hidden">
                 <div className="h-40 bg-secondary/20">
                   <img
