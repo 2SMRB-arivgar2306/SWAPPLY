@@ -7,10 +7,13 @@ import SearchBar from "@/components/search-bar"
 import ProductGrid from "@/components/product-grid"
 import Navigation from "@/components/navigation"
 import { Plus } from "lucide-react"
+import Image from "next/image"
+import Link from "next/link"
 
 export default function Home() {
   const router = useRouter()
   const [user, setUser] = useState<any>(null)
+  const [isChecking, setIsChecking] = useState(true)
   const [searchTerm, setSearchTerm] = useState("")
   const [selectedCategory, setSelectedCategory] = useState("all")
 
@@ -18,17 +21,45 @@ export default function Home() {
     const storedUser = localStorage.getItem("user")
     if (storedUser) {
       setUser(JSON.parse(storedUser))
-    } else {
-      router.push("/auth/login")
     }
-  }, [router])
+    setIsChecking(false)
+  }, [])
 
   const handlePublish = () => {
     router.push("/publicar")
   }
 
-  if (!user) {
+  if (isChecking) {
     return null
+  }
+
+  if (!user) {
+    return (
+      <main className="min-h-screen bg-background flex flex-col items-center justify-center p-4">
+        <div className="flex flex-col items-center max-w-lg w-full text-center space-y-10">
+          <div className="flex justify-center">
+            <Image src="/logo-swapply.png" alt="Swapply" width={160} height={160} className="w-40 h-40 drop-shadow-md" priority />
+          </div>
+          <div className="space-y-4">
+            <h1 className="text-4xl md:text-5xl font-extrabold text-accent leading-tight">
+              ¡Bienvenido a Swapply!
+            </h1>
+            <p className="text-lg md:text-xl text-muted-foreground">
+              La plataforma para intercambiar eso que ya no necesitas, por lo que siempre has querido. <br />
+              <span className="font-semibold text-foreground mt-2 block">Cambia todo, gasta nada.</span>
+            </p>
+          </div>
+          <div className="pt-8 w-full flex justify-center">
+            <Link
+              href="/auth/login"
+              className="w-full sm:w-80 bg-accent hover:bg-accent/90 text-accent-foreground font-bold py-4 px-8 rounded-full shadow-lg transition-all transform hover:scale-105 active:scale-95 text-xl flex items-center justify-center"
+            >
+              Entrar
+            </Link>
+          </div>
+        </div>
+      </main>
+    )
   }
 
   return (

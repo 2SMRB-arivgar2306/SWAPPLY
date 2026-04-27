@@ -14,16 +14,33 @@ export default function RegisterPage() {
   const [name, setName] = useState("")
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
+  const [confirmPassword, setConfirmPassword] = useState("")
   const [error, setError] = useState("")
   const [loading, setLoading] = useState(false)
+
+  const isLengthValid = password.length >= 8 && password.length <= 16;
+  const hasUppercase = /[A-Z]/.test(password);
+  const hasNumber = /\d/.test(password);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
     setError("")
 
-    if (!name || !email || !password) {
+    if (!name || !email || !password || !confirmPassword) {
       setError("Por favor completa todos los campos")
+      setLoading(false)
+      return
+    }
+
+    if (password !== confirmPassword) {
+      setError("Las contraseñas no coinciden")
+      setLoading(false)
+      return
+    }
+
+    if (!isLengthValid || !hasUppercase || !hasNumber) {
+      setError("La contraseña no cumple con los requisitos mínimos")
       setLoading(false)
       return
     }
@@ -117,6 +134,35 @@ export default function RegisterPage() {
               >
                 {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
               </button>
+            </div>
+            {/* Requisitos de la contraseña */}
+            <div className="text-sm space-y-1 mt-3">
+              <p className={isLengthValid ? "text-green-600 font-medium" : "text-red-500 font-medium"}>
+                {isLengthValid ? "✓" : "✗"} 8 - 16 caracteres
+              </p>
+              <p className={hasUppercase ? "text-green-600 font-medium" : "text-red-500 font-medium"}>
+                {hasUppercase ? "✓" : "✗"} 1 letra mayúscula
+              </p>
+              <p className={hasNumber ? "text-green-600 font-medium" : "text-red-500 font-medium"}>
+                {hasNumber ? "✓" : "✗"} 1 número
+              </p>
+            </div>
+          </div>
+
+          <div>
+            <label htmlFor="confirmPassword" className="block text-sm font-medium text-foreground mb-2">
+              Confirmar contraseña
+            </label>
+            <div className="relative">
+              <input
+                id="confirmPassword"
+                type={showPassword ? "text" : "password"}
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                placeholder="Repite tu contraseña"
+                className={`w-full px-4 py-3 bg-background border rounded-lg focus:outline-none focus:ring-2 focus:ring-accent transition-colors pr-10 ${confirmPassword && confirmPassword !== password ? 'border-red-500' : 'border-border'
+                  }`}
+              />
             </div>
           </div>
 
