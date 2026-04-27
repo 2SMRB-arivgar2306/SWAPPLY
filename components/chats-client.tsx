@@ -1,8 +1,7 @@
 "use client"
 
-import { useState, useRef } from "react"
+import { useState, useRef, useEffect } from "react"
 import type React from "react"
-import { useEffect } from "react"
 import { Search, Plus, Send, Image as ImageIcon, CheckCircle, Star } from "lucide-react"
 import { useRouter } from "next/navigation"
 
@@ -31,6 +30,7 @@ interface Message {
 export default function ChatsClient() {
   const router = useRouter()
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const messagesEndRef = useRef<HTMLDivElement>(null)
 
   const renderAvatar = (avatarStr: string) => {
     const isUrl = avatarStr?.startsWith('http') || avatarStr?.startsWith('data:');
@@ -59,6 +59,10 @@ export default function ChatsClient() {
       }
     }
   }, [])
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
+  }, [chats, selectedChatId])
 
   useEffect(() => {
     if (userId) {
@@ -318,6 +322,7 @@ export default function ChatsClient() {
                   </div>
                 )
               })}
+              <div ref={messagesEndRef} />
             </div>
 
             {selectedImage && (
