@@ -6,11 +6,12 @@ export const dynamic = 'force-dynamic';
 
 export async function GET(
     request: Request,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> | { id: string } }
 ) {
     try {
         await connectToDatabase();
-        const article = await Article.findById(params.id).populate('userId', 'name location');
+        const resolvedParams = await params;
+        const article = await Article.findById(resolvedParams.id).populate('userId', 'name location');
 
         if (!article) {
             return NextResponse.json(
@@ -42,13 +43,14 @@ export async function GET(
 
 export async function PUT(
     request: Request,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> | { id: string } }
 ) {
     try {
         await connectToDatabase();
+        const resolvedParams = await params;
         const body = await request.json();
 
-        const updatedArticle = await Article.findByIdAndUpdate(params.id, body, {
+        const updatedArticle = await Article.findByIdAndUpdate(resolvedParams.id, body, {
             new: true,
             runValidators: true,
         }).populate('userId', 'name location');
@@ -89,11 +91,12 @@ export async function PUT(
 
 export async function DELETE(
     request: Request,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> | { id: string } }
 ) {
     try {
         await connectToDatabase();
-        const deletedArticle = await Article.findByIdAndDelete(params.id);
+        const resolvedParams = await params;
+        const deletedArticle = await Article.findByIdAndDelete(resolvedParams.id);
 
         if (!deletedArticle) {
             return NextResponse.json(

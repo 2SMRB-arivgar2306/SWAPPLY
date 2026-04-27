@@ -6,11 +6,12 @@ export const dynamic = 'force-dynamic';
 
 export async function GET(
     request: Request,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> | { id: string } }
 ) {
     try {
         await connectToDatabase();
-        const user = await User.findById(params.id).select('-password');
+        const resolvedParams = await params;
+        const user = await User.findById(resolvedParams.id).select('-password');
 
         if (!user) {
             return NextResponse.json(
@@ -37,10 +38,11 @@ export async function GET(
 
 export async function PUT(
     request: Request,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> | { id: string } }
 ) {
     try {
         await connectToDatabase();
+        const resolvedParams = await params;
         const body = await request.json();
 
         // Only allow updating name, email, bio, location
@@ -51,7 +53,7 @@ export async function PUT(
         if (body.location !== undefined) updateData.location = body.location;
 
         const updatedUser = await User.findByIdAndUpdate(
-            params.id,
+            resolvedParams.id,
             updateData,
             { new: true, runValidators: true }
         ).select('-password');

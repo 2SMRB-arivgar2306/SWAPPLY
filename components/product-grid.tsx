@@ -1,95 +1,17 @@
 "use client"
 import ProductCard from "./product-card"
+import { useArticles } from "@/lib/articles-context"
 
-const products = [
-  {
-    id: 1,
-    title: "iPhone 12",
-    category: "tech",
-    image: "/iphone-12.png",
-    location: "Madrid",
-    user: "Juan M.",
-    wantsFor: "iPad Pro",
-    condition: "Como nuevo",
-  },
-  {
-    id: 2,
-    title: "Bicicleta montaña",
-    category: "sports",
-    image: "/mountain-bike-trail.png",
-    location: "Barcelona",
-    user: "María L.",
-    wantsFor: "Patinete eléctrico",
-    condition: "Muy buen estado",
-  },
-  {
-    id: 3,
-    title: "Zapatillas Nike Air Max",
-    category: "fashion",
-    image: "/product-1.png",
-    location: "Valencia",
-    user: "Carlos R.",
-    wantsFor: "Zapatillas Adidas",
-    condition: "Sin usar",
-  },
-  {
-    id: 4,
-    title: "PlayStation 5",
-    category: "tech",
-    image: "/playstation-5-console.png",
-    location: "Sevilla",
-    user: "Ana G.",
-    wantsFor: "Xbox Series X",
-    condition: "Perfectas condiciones",
-  },
-  {
-    id: 5,
-    title: "Lámpara de diseño",
-    category: "home",
-    image: "/design-lamp.jpg",
-    location: "Bilbao",
-    user: "Pedro H.",
-    wantsFor: "Espejo vintage",
-    condition: "Como nuevo",
-  },
-  {
-    id: 6,
-    title: "Colección libros clásicos",
-    category: "books",
-    image: "/classic-books.jpg",
-    location: "Zaragoza",
-    user: "Isabel S.",
-    wantsFor: "Novelas de sci-fi",
-    condition: "Muy buen estado",
-  },
-  {
-    id: 7,
-    title: "Cámara Canon EOS",
-    category: "tech",
-    image: "/canon-eos-camera.jpg",
-    location: "Málaga",
-    user: "David M.",
-    wantsFor: "Lentes profesionales",
-    condition: "Excelentes condiciones",
-  },
-  {
-    id: 8,
-    title: "Escritorio madera maciza",
-    category: "home",
-    image: "/wooden-desk-furniture.jpg",
-    location: "Pamplona",
-    user: "Laura P.",
-    wantsFor: "Estantería moderna",
-    condition: "Buen estado",
-  },
-]
+export default function ProductGrid({ searchTerm, selectedCategory }: { searchTerm: string, selectedCategory: string }) {
+  const { articles } = useArticles()
 
-export default function ProductGrid({ searchTerm, selectedCategory }) {
-  const filteredProducts = products.filter((product) => {
-    const matchesSearch =
-      product.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      product.wantsFor.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredProducts = articles.filter((product: any) => {
+    const searchLower = searchTerm.toLowerCase()
+    const titleMatch = product.title?.toLowerCase().includes(searchLower) || false
+    const wantsMatch = product.wantsFor?.toLowerCase().includes(searchLower) || false
+    const matchesSearch = titleMatch || wantsMatch
     const matchesCategory = selectedCategory === "all" || product.category === selectedCategory
+
     return matchesSearch && matchesCategory
   })
 
@@ -102,7 +24,7 @@ export default function ProductGrid({ searchTerm, selectedCategory }) {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {filteredProducts.map((product) => (
+        {filteredProducts.map((product: any) => (
           <ProductCard key={product.id} product={product} />
         ))}
       </div>

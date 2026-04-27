@@ -61,7 +61,7 @@ export default function RegisterPage() {
       }
 
       localStorage.setItem("user", JSON.stringify(data.user))
-      router.push("/")
+      window.location.href = "/"
     } catch (err: any) {
       setError(err.message || "No se pudo registrar el usuario")
     } finally {

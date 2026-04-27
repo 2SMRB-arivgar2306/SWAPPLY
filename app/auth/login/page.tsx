@@ -45,7 +45,7 @@ export default function LoginPage() {
 
       // Success
       localStorage.setItem("user", JSON.stringify(data.user));
-      router.push("/");
+      window.location.href = "/";
     } catch (err: any) {
       setError(err.message || "Credenciales incorrectas o error de servidor");
     } finally {

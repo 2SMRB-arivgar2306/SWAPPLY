@@ -4,98 +4,48 @@ import { NextResponse } from 'next/server';
 
 export const dynamic = 'force-dynamic';
 
-export async function GET(
-    request: Request,
-    { params }: { params: { id: string } }
-) {
-    try {
-        await connectToDatabase();
-        const chat = await Chat.findById(params.id);
-
-        if (!chat) {
-            return NextResponse.json(
-                { message: 'Chat not found' },
-                { status: 404 }
-            );
-        }
-
-        const messages = chat.messages.map((msg: any) => ({
-            id: msg._id,
-            sender: msg.sender,
-            text: msg.text,
-            time: msg.time,
-        }));
-
-        return NextResponse.json(messages, { status: 200 });
-    } catch (error) {
-        console.error('Error fetching messages:', error);
-        return NextResponse.json(
-            { message: 'Error fetching messages', error: error instanceof Error ? error.message : String(error) },
-            { status: 500 }
-        );
-    }
-}
-
 export async function POST(
     request: Request,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> | { id: string } }
 ) {
     try {
         await connectToDatabase();
+        const resolvedParams = await params;
         const body = await request.json();
 
-        if (!body.text || !body.sender) {
+        if (!body.sender || !body.text || !body.time) {
             return NextResponse.json(
-                { message: 'text and sender are required' },
+                { message: 'Missing required fields' },
                 { status: 400 }
             );
         }
 
-        const time = body.time || new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
-
-        const chat = await Chat.findByIdAndUpdate(
-            params.id,
-            {
-                $push: {
-                    messages: {
-                        sender: body.sender,
-                        text: body.text,
-                        time: time,
-                    }
-                },
-                $set: {
-                    lastMessage: body.text,
-                    lastTime: time,
-                }
-            },
-            { new: true }
-        );
+        const chat = await Chat.findById(resolvedParams.id);
 
         if (!chat) {
-            return NextResponse.json(
-                { message: 'Chat not found' },
-                { status: 404 }
-            );
+            return NextResponse.json({ message: 'Chat not found' }, { status: 404 });
         }
 
-        const newMessage = chat.messages[chat.messages.length - 1];
+        const newMessage = {
+            sender: body.sender,
+            text: body.text,
+            time: body.time
+        };
 
-        return NextResponse.json(
-            {
-                message: 'Message sent',
-                data: {
-                    id: newMessage._id,
-                    sender: newMessage.sender,
-                    text: newMessage.text,
-                    time: newMessage.time,
-                }
-            },
-            { status: 201 }
-        );
+        chat.messages.push(newMessage);
+        chat.lastMessage = body.text;
+        chat.lastTime = body.time;
+        if (body.sender !== 'me') {
+            chat.unread += 1;
+        }
+
+        await chat.save();
+
+        return NextResponse.json({ message: 'Message added successfully', data: chat.messages[chat.messages.length - 1] }, { status: 201 });
     } catch (error) {
-        console.error('Error sending message:', error);
+        console.error('Error adding chat message:', error);
         return NextResponse.json(
-            { message: 'Error sending message', error: error instanceof Error ? error.message : String(error) },
+            { message: 'Error adding message', error: error instanceof Error ? error.message : String(error) },
             { status: 500 }
         );
     }
