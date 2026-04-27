@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useRef } from "react"
 import type React from "react"
 import { useEffect } from "react"
 import { Search, Plus, Send, Image as ImageIcon, CheckCircle, Star } from "lucide-react"
@@ -28,6 +28,16 @@ interface Message {
 
 export default function ChatsClient() {
   const router = useRouter()
+  const fileInputRef = useRef<HTMLInputElement>(null)
+
+  const renderAvatar = (avatarStr: string) => {
+    const isUrl = avatarStr?.startsWith('http') || avatarStr?.startsWith('data:');
+    if (isUrl) {
+      return <img src={avatarStr} alt="Avatar" className="w-full h-full object-cover rounded-full" />
+    }
+    return <span className="text-2xl">{avatarStr || "👤"}</span>
+  }
+
   const [chats, setChats] = useState<Chat[]>([])
   const [userId, setUserId] = useState<string | null>(null)
   const [selectedChatId, setSelectedChatId] = useState<string | null>(null)
@@ -144,10 +154,24 @@ export default function ChatsClient() {
     await sendPayload(textToSend)
   }
 
-  const handleSendImage = async () => {
-    const url = prompt("Introduce la URL de la imagen que quieres enviar:")
-    if (url && url.length > 5) {
-      await sendPayload("", url, false);
+  const handleSendImageClick = () => {
+    fileInputRef.current?.click()
+  }
+
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (!file.type.startsWith('image/')) {
+        alert("Por favor selecciona una imagen válida.");
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = async (event) => {
+        const base64String = event.target?.result as string;
+        await sendPayload("", base64String, false);
+      };
+      reader.readAsDataURL(file);
     }
   }
 
@@ -209,8 +233,10 @@ export default function ChatsClient() {
                   }`}
               >
                 <div className="flex items-center gap-3">
-                  <div className="text-3xl">{chat.avatar}</div>
-                  <div className="flex-1">
+                  <div className="w-12 h-12 flex items-center justify-center bg-secondary/30 rounded-full shrink-0">
+                    {renderAvatar(chat.avatar)}
+                  </div>
+                  <div className="flex-1 overflow-hidden">
                     <div className="flex justify-between items-baseline gap-2">
                       <h3 className="font-semibold text-foreground text-sm">{chat.name}</h3>
                       <span className="text-xs text-muted-foreground">{chat.lastTime}</span>
@@ -234,11 +260,13 @@ export default function ChatsClient() {
           <>
             <div className="p-4 border-b border-border flex items-center justify-between shadow-sm z-10">
               <div
-                className="flex items-center gap-3 cursor-pointer hover:bg-secondary/50 p-2 rounded-lg transition-transform"
+                className="flex items-center gap-3 cursor-pointer hover:bg-secondary/50 p-2 rounded-lg transition-transform max-w-[60%]"
                 onClick={() => router.push(`/usuario/${selectedChat.userId}`)}
               >
-                <div className="text-3xl transition-transform">{selectedChat.avatar}</div>
-                <div>
+                <div className="w-12 h-12 flex items-center justify-center bg-secondary/30 rounded-full shrink-0">
+                  {renderAvatar(selectedChat.avatar)}
+                </div>
+                <div className="overflow-hidden w-full">
                   <h2 className="text-lg font-semibold text-foreground hover:underline">{selectedChat.name}</h2>
                   <p className="text-xs text-muted-foreground">Ver perfil</p>
                 </div>
@@ -284,9 +312,16 @@ export default function ChatsClient() {
             </div>
 
             <form onSubmit={handleSendMessage} className="p-4 border-t border-border flex gap-2 bg-card">
+              <input
+                type="file"
+                ref={fileInputRef}
+                className="hidden"
+                accept="image/*"
+                onChange={handleFileUpload}
+              />
               <button
                 type="button"
-                onClick={handleSendImage}
+                onClick={handleSendImageClick}
                 className="p-3 bg-secondary/80 hover:bg-secondary text-foreground rounded-lg transition-colors shadow-sm"
               >
                 <ImageIcon size={20} />
