@@ -11,6 +11,8 @@ interface Chat {
   userId: string // Partner's ID
   name: string
   avatar: string
+  bio?: string
+  rating?: number
   lastMessage: string
   lastTime: string
   unread: number
@@ -43,6 +45,7 @@ export default function ChatsClient() {
   const [selectedChatId, setSelectedChatId] = useState<string | null>(null)
   const [searchTerm, setSearchTerm] = useState("")
   const [messageText, setMessageText] = useState("")
+  const [selectedImage, setSelectedImage] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -91,7 +94,7 @@ export default function ChatsClient() {
     const time = new Date().toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" })
     const tempMessage: Message = {
       id: `temp-${Date.now()}`,
-      sender: "me",
+      sender: (userId as "me" | "other" | any) || "me",
       text: text,
       time: time,
       image: imageUrl,
@@ -117,7 +120,7 @@ export default function ChatsClient() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          sender: "me",
+          sender: userId || "me",
           text: text,
           time: time,
           image: imageUrl,
@@ -148,10 +151,12 @@ export default function ChatsClient() {
 
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!messageText.trim() || !selectedChat || !selectedChatId) return
+    if ((!messageText.trim() && !selectedImage) || !selectedChat || !selectedChatId) return
     const textToSend = messageText;
-    setMessageText("")
-    await sendPayload(textToSend)
+    const imageToSend = selectedImage;
+    setMessageText("");
+    setSelectedImage(null);
+    await sendPayload(textToSend, imageToSend || undefined)
   }
 
   const handleSendImageClick = () => {
@@ -167,9 +172,9 @@ export default function ChatsClient() {
       }
 
       const reader = new FileReader();
-      reader.onload = async (event) => {
+      reader.onload = (event) => {
         const base64String = event.target?.result as string;
-        await sendPayload("", base64String, false);
+        setSelectedImage(base64String);
       };
       reader.readAsDataURL(file);
     }
@@ -267,8 +272,11 @@ export default function ChatsClient() {
                   {renderAvatar(selectedChat.avatar)}
                 </div>
                 <div className="overflow-hidden w-full">
-                  <h2 className="text-lg font-semibold text-foreground hover:underline">{selectedChat.name}</h2>
-                  <p className="text-xs text-muted-foreground">Ver perfil</p>
+                  <h2 className="text-lg font-semibold text-foreground hover:underline flex items-center gap-2 truncate">
+                    {selectedChat.name}
+                    {(selectedChat.rating ?? 0) > 0 && <span className="text-yellow-500 text-sm flex items-center gap-1 shrink-0"><Star size={14} fill="currentColor" /> {selectedChat.rating?.toFixed(1)}</span>}
+                  </h2>
+                  <p className="text-xs text-muted-foreground truncate">{selectedChat.bio || "Ver perfil completo"}</p>
                 </div>
               </div>
               <button
@@ -292,18 +300,19 @@ export default function ChatsClient() {
                   );
                 }
 
+                const isMe = message.sender === userId || message.sender === "me";
                 return (
-                  <div key={message.id} className={`flex ${message.sender === "me" ? "justify-end" : "justify-start"}`}>
+                  <div key={message.id} className={`flex ${isMe ? "justify-end" : "justify-start"}`}>
                     <div
-                      className={`max-w-xs px-4 py-2 rounded-xl shadow-sm ${message.sender === "me"
+                      className={`max-w-xs md:max-w-md px-4 py-2 rounded-xl shadow-sm ${isMe
                         ? "bg-accent text-accent-foreground rounded-br-none"
-                        : "bg-secondary text-foreground rounded-bl-none"
+                        : "bg-secondary/40 border border-black/5 text-foreground rounded-bl-none"
                         }`}
                     >
                       {message.image && (
                         <img src={message.image} alt="Adjunto" className="w-full max-w-full rounded-lg mb-2 border border-black/10" />
                       )}
-                      {message.text && <p className="text-sm font-medium leading-relaxed">{message.text}</p>}
+                      {message.text && <p className="text-sm font-medium leading-relaxed break-words">{message.text}</p>}
                       <span className="text-[10px] opacity-70 block mt-1 text-right">{message.time}</span>
                     </div>
                   </div>
@@ -311,6 +320,20 @@ export default function ChatsClient() {
               })}
             </div>
 
+            {selectedImage && (
+              <div className="px-4 py-2 bg-card border-t border-border flex justify-between items-end">
+                <div className="relative w-16 h-16 rounded-md overflow-hidden border border-border">
+                  <img src={selectedImage} alt="Preview" className="w-full h-full object-cover" />
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setSelectedImage(null)}
+                  className="text-red-500 text-xs font-semibold hover:underline"
+                >
+                  Cancelar foto
+                </button>
+              </div>
+            )}
             <form onSubmit={handleSendMessage} className="p-4 border-t border-border flex gap-2 bg-card">
               <input
                 type="file"

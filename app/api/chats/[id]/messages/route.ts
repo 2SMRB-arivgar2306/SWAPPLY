@@ -29,15 +29,15 @@ export async function POST(
         const newMessage = {
             sender: body.sender,
             text: body.text,
-            time: body.time
+            time: body.time,
+            image: body.image,
+            isSystem: body.isSystem
         };
 
         chat.messages.push(newMessage);
-        chat.lastMessage = body.text;
+        chat.lastMessage = body.text || 'Imagen enviada';
         chat.lastTime = body.time;
-        if (body.sender !== 'me') {
-            chat.unread += 1;
-        }
+        // Skip unread count calculation given symmetric DB structure for now
 
         await chat.save();
 

@@ -3,7 +3,6 @@ import mongoose from 'mongoose';
 const MessageSubSchema = new mongoose.Schema({
     sender: {
         type: String,
-        enum: ['me', 'other'],
         required: true,
     },
     text: {

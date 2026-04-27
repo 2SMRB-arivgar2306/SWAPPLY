@@ -19,13 +19,14 @@ export async function GET(req: Request) {
         await connectToDatabase();
         const chats = await Chat.find({
             $or: [{ userId: userId }, { otherUserId: userId }]
-        }).sort({ createdAt: -1 }).populate('userId otherUserId', 'name avatar');
+        }).sort({ createdAt: -1 }).populate('userId otherUserId', 'name avatar bio rating');
 
         const formatted = chats.map(chat => {
-            // Determine name and avatar based on if the current user is initiator or target
             const isInitiator = String(chat.userId?._id) === userId;
             const targetName = isInitiator ? chat.name : (chat.userId?.name || 'Usuario');
             const targetAvatar = isInitiator ? chat.avatar : (chat.userId?.avatar || '👤');
+            const targetBio = isInitiator ? (chat.otherUserId?.bio || '') : (chat.userId?.bio || '');
+            const targetRating = isInitiator ? (chat.otherUserId?.rating || 0) : (chat.userId?.rating || 0);
             const trueOtherUserId = isInitiator ? chat.otherUserId?._id : chat.userId?._id;
 
             return {
@@ -33,14 +34,14 @@ export async function GET(req: Request) {
                 userId: trueOtherUserId,
                 name: targetName,
                 avatar: targetAvatar,
+                bio: targetBio,
+                rating: targetRating,
                 lastMessage: chat.lastMessage,
                 lastTime: chat.lastTime,
                 unread: chat.unread,
                 messages: chat.messages.map((msg: any) => ({
                     id: msg._id,
-                    sender: String(msg.sender) === 'me'
-                        ? (isInitiator ? 'me' : 'other')
-                        : (isInitiator ? 'other' : 'me'), // Flip perspectives
+                    sender: msg.sender,
                     text: msg.text,
                     time: msg.time,
                     image: msg.image,
@@ -92,7 +93,7 @@ export async function POST(req: Request) {
             lastTime: new Date().toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" }),
             unread: 0,
             messages: [{
-                sender: 'me',
+                sender: body.userId,
                 text: body.initialMessage || 'Interesado en tus artículos',
                 time: new Date().toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" }),
             }],
