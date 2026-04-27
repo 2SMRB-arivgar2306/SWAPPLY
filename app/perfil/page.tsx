@@ -4,15 +4,23 @@ import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import Navigation from "@/components/navigation"
 import { LogOut, User } from "lucide-react"
+import { useArticles } from "@/lib/articles-context"
 
 export default function ProfilePage() {
   const router = useRouter()
   const [user, setUser] = useState<any>(null)
+  const [profileData, setProfileData] = useState<any>(null)
+
+  const { articles } = useArticles()
 
   useEffect(() => {
     const storedUser = localStorage.getItem("user")
     if (storedUser) {
-      setUser(JSON.parse(storedUser))
+      const u = JSON.parse(storedUser)
+      setUser(u)
+      fetch(`/api/users/${u.id}`)
+        .then(res => res.json())
+        .then(data => setProfileData(data))
     } else {
       router.push("/auth/login")
     }
@@ -33,40 +41,67 @@ export default function ProfilePage() {
 
   const handleLogout = () => {
     localStorage.removeItem("user")
-    router.push("/auth/login")
+    window.location.href = "/auth/login"
   }
 
-  if (!user) {
-    return null
+  if (!user || !profileData) {
+    return (
+      <main className="min-h-screen bg-background pb-16 md:pb-0 md:ml-16 animate-pulse">
+        <Navigation />
+        <div className="max-w-2xl mx-auto p-4 md:p-6 mt-10 text-center text-muted-foreground">Cargando tu perfil espectacular...</div>
+      </main>
+    )
   }
+
+  const exactArticlesCount = articles.filter((a: any) => String(a.userId) === String(user.id)).length
 
   return (
     <main className="min-h-screen bg-background pb-16 md:pb-0 md:ml-16">
       <Navigation />
 
-      <div className="max-w-2xl mx-auto p-4 md:p-6">
+      <div className="max-w-2xl mx-auto p-4 md:p-6 lg:mt-4">
         {/* Perfil Header */}
-        <div className="bg-card border border-border rounded-2xl p-6 mb-6 text-center">
-          <div className="w-24 h-24 bg-secondary/30 rounded-full flex items-center justify-center mx-auto mb-4">
-            <User size={48} className="text-accent" />
-          </div>
-          <h1 className="text-2xl font-bold text-foreground mb-2">{user.name || user.email}</h1>
-          <p className="text-muted-foreground">{user.email}</p>
+        <div className="bg-card shadow-sm border border-border rounded-2xl p-6 mb-6 text-center">
+
+          {profileData.avatar && profileData.avatar !== '/placeholder.svg' ? (
+            <div className="w-32 h-32 mx-auto mb-4 relative rounded-full overflow-hidden border-4 border-accent shadow-md">
+              <img src={profileData.avatar} alt={profileData.name} className="w-full h-full object-cover" />
+            </div>
+          ) : (
+            <div className="w-32 h-32 bg-secondary/30 rounded-full flex items-center justify-center mx-auto mb-4 border-4 border-transparent">
+              <User size={64} className="text-accent" />
+            </div>
+          )}
+
+          <h1 className="text-3xl font-bold text-foreground mb-1">{profileData.name}</h1>
+          <p className="text-sm font-medium text-muted-foreground mb-4 opacity-80">@{profileData.email.split('@')[0]}</p>
+
+          {profileData.bio && (
+            <p className="text-foreground max-w-md mx-auto mb-4 text-sm italic">{profileData.bio}</p>
+          )}
+
+          {profileData.location && (
+            <div className="inline-flex items-center justify-center bg-secondary/50 rounded-full px-4 py-1 text-xs font-semibold text-foreground/80 mb-2">
+              📍 {profileData.location}
+            </div>
+          )}
         </div>
 
         {/* Stats */}
-        <div className="grid grid-cols-3 gap-4 mb-6">
-          <div className="bg-card border border-border rounded-xl p-4 text-center">
-            <div className="text-2xl font-bold text-accent">24</div>
-            <p className="text-xs text-muted-foreground mt-1">Intercambios</p>
+        <div className="grid grid-cols-3 gap-4 mb-8">
+          <div className="bg-card border border-border rounded-xl p-4 text-center shadow-sm hover:shadow-md transition-shadow">
+            <div className="text-3xl font-bold text-accent">{profileData.exchanges || 0}</div>
+            <p className="text-xs text-muted-foreground mt-1 uppercase font-bold tracking-wider">Intercambios</p>
           </div>
-          <div className="bg-card border border-border rounded-xl p-4 text-center">
-            <div className="text-2xl font-bold text-accent">4.8</div>
-            <p className="text-xs text-muted-foreground mt-1">Valoración</p>
+          <div className="bg-card border border-border rounded-xl p-4 text-center shadow-sm hover:shadow-md transition-shadow">
+            <div className="text-3xl font-bold text-accent">{profileData.rating ? profileData.rating.toFixed(1) : "0.0"}</div>
+            <p className="text-xs text-muted-foreground mt-1 uppercase font-bold tracking-wider opacity-70">
+              ⭐ {profileData.ratingCount || 0} valoraciones
+            </p>
           </div>
-          <div className="bg-card border border-border rounded-xl p-4 text-center">
-            <div className="text-2xl font-bold text-accent">142</div>
-            <p className="text-xs text-muted-foreground mt-1">Artículos</p>
+          <div className="bg-card border border-border rounded-xl p-4 text-center shadow-sm hover:shadow-md transition-shadow">
+            <div className="text-3xl font-bold text-accent">{exactArticlesCount}</div>
+            <p className="text-xs text-muted-foreground mt-1 uppercase font-bold tracking-wider">Artículos</p>
           </div>
         </div>
 
@@ -74,25 +109,25 @@ export default function ProfilePage() {
         <div className="space-y-3">
           <button
             onClick={handleEditProfile}
-            className="w-full bg-card border border-border hover:bg-secondary/10 text-foreground font-semibold py-3 rounded-lg transition-colors"
+            className="w-full bg-accent/10 border border-accent/20 hover:bg-accent/20 text-accent font-semibold py-3 rounded-xl transition-all"
           >
             Editar Perfil
           </button>
           <button
             onClick={handleMyItems}
-            className="w-full bg-card border border-border hover:bg-secondary/10 text-foreground font-semibold py-3 rounded-lg transition-colors"
+            className="w-full bg-card border border-border hover:bg-secondary/20 text-foreground font-semibold py-3 rounded-xl transition-all shadow-sm"
           >
             Mis Artículos
           </button>
           <button
             onClick={handleFavorites}
-            className="w-full bg-card border border-border hover:bg-secondary/10 text-foreground font-semibold py-3 rounded-lg transition-colors"
+            className="w-full bg-card border border-border hover:bg-secondary/20 text-foreground font-semibold py-3 rounded-xl transition-all shadow-sm"
           >
             Favoritos
           </button>
           <button
             onClick={handleLogout}
-            className="w-full bg-red-500 hover:bg-red-600 text-white font-semibold py-3 rounded-lg transition-colors flex items-center justify-center gap-2"
+            className="w-full mt-8 border border-red-500/20 text-red-500 hover:bg-red-500 hover:text-white font-semibold py-3 rounded-xl transition-all flex items-center justify-center gap-2"
           >
             <LogOut size={20} />
             Cerrar sesión

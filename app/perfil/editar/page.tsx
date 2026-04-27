@@ -15,6 +15,7 @@ export default function EditarPerfilPage() {
     email: "",
     bio: "",
     location: "",
+    avatar: "",
   })
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
@@ -42,6 +43,7 @@ export default function EditarPerfilPage() {
           email: data.email || "",
           bio: data.bio || "",
           location: data.location || "",
+          avatar: data.avatar || "",
         })
       }
     } catch (err) {
@@ -69,6 +71,7 @@ export default function EditarPerfilPage() {
           email: formData.email,
           bio: formData.bio,
           location: formData.location,
+          avatar: formData.avatar,
         }),
       })
 
@@ -127,6 +130,26 @@ export default function EditarPerfilPage() {
         )}
 
         <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="flex gap-4">
+            {formData.avatar && (
+              <img src={formData.avatar} alt="Avatar" className="w-16 h-16 rounded-full object-cover border border-border" />
+            )}
+            <div className="flex-1">
+              <label htmlFor="avatar" className="block text-sm font-medium text-foreground mb-2">
+                URL de imagen de perfil (Avatar)
+              </label>
+              <input
+                id="avatar"
+                type="text"
+                name="avatar"
+                value={formData.avatar}
+                onChange={handleChange}
+                placeholder="https://..."
+                className="w-full px-4 py-3 bg-card border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-accent transition-colors"
+              />
+            </div>
+          </div>
+
           <div>
             <label htmlFor="name" className="block text-sm font-medium text-foreground mb-2">
               Nombre completo

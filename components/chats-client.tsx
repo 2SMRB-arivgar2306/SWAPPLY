@@ -1,13 +1,14 @@
 "use client"
 
 import { useState } from "react"
-
 import type React from "react"
 import { useEffect } from "react"
-import { Search, Plus, Send } from "lucide-react"
+import { Search, Plus, Send, Image as ImageIcon, CheckCircle, Star } from "lucide-react"
+import { useRouter } from "next/navigation"
 
 interface Chat {
   id: string
+  userId: string // Partner's ID
   name: string
   avatar: string
   lastMessage: string
@@ -21,9 +22,12 @@ interface Message {
   sender: "me" | "other"
   text: string
   time: string
+  image?: string
+  isSystem?: boolean
 }
 
 export default function ChatsClient() {
+  const router = useRouter()
   const [chats, setChats] = useState<Chat[]>([])
   const [userId, setUserId] = useState<string | null>(null)
   const [selectedChatId, setSelectedChatId] = useState<string | null>(null)
@@ -71,18 +75,17 @@ export default function ChatsClient() {
   const selectedChat = chats.find((c) => c.id === selectedChatId)
   const filteredChats = chats.filter((chat) => chat.name.toLowerCase().includes(searchTerm.toLowerCase()))
 
-  const handleSendMessage = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!messageText.trim() || !selectedChat || !selectedChatId) return
+  const sendPayload = async (text: string, imageUrl?: string, systemMsg?: boolean) => {
+    if (!selectedChatId) return;
 
     const time = new Date().toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" })
-
-    // Optimistic update
     const tempMessage: Message = {
       id: `temp-${Date.now()}`,
       sender: "me",
-      text: messageText,
+      text: text,
       time: time,
+      image: imageUrl,
+      isSystem: systemMsg,
     }
 
     setChats((prev) =>
@@ -91,14 +94,13 @@ export default function ChatsClient() {
           return {
             ...chat,
             messages: [...chat.messages, tempMessage],
-            lastMessage: messageText,
+            lastMessage: text || (imageUrl ? "🖼️ Foto enviada" : "Intercambio Terminado"),
             lastTime: time,
           }
         }
         return chat
       })
     )
-    setMessageText("")
 
     try {
       const res = await fetch(`/api/chats/${selectedChatId}/messages`, {
@@ -106,14 +108,15 @@ export default function ChatsClient() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           sender: "me",
-          text: tempMessage.text,
+          text: text,
           time: time,
+          image: imageUrl,
+          isSystem: systemMsg
         }),
       })
 
       if (res.ok) {
         const data = await res.json()
-        // Replace temp message with real one
         setChats((prev) =>
           prev.map((chat) => {
             if (chat.id === selectedChatId) {
@@ -129,15 +132,55 @@ export default function ChatsClient() {
         )
       }
     } catch (error) {
-      console.error("[SWAPPLY] Error sending message:", error)
+      console.error("[SWAPPLY] Error:", error)
+    }
+  }
+
+  const handleSendMessage = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!messageText.trim() || !selectedChat || !selectedChatId) return
+    const textToSend = messageText;
+    setMessageText("")
+    await sendPayload(textToSend)
+  }
+
+  const handleSendImage = async () => {
+    const url = prompt("Introduce la URL de la imagen que quieres enviar:")
+    if (url && url.length > 5) {
+      await sendPayload("", url, false);
+    }
+  }
+
+  const handleFinalize = async () => {
+    if (!selectedChat || !userId) return;
+    const ratingStr = prompt("Del 1 al 5, ¿cómo valorarías a este usuario por el intercambio?");
+    const ratingNum = parseInt(ratingStr || "0");
+    if (ratingNum >= 1 && ratingNum <= 5) {
+      try {
+        const res = await fetch(`/api/users/${selectedChat.userId}/rate`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ stars: ratingNum })
+        });
+
+        if (res.ok) {
+          await sendPayload(`✅ El intercambio ha sido marcado como completado y calificado con ${ratingNum}/5 estrellas.`, undefined, true);
+          alert("¡Intercambio finalizado excitósamente!");
+        } else {
+          alert("Error al finalizar el intercambio.");
+        }
+      } catch (e) {
+        console.error(e)
+        alert("Ocurrió un problema.");
+      }
+    } else {
+      alert("Valoración no válida. Debía ser entre 1 y 5.");
     }
   }
 
   return (
     <>
-      {/* Lista de chats - Mobile y Desktop */}
       <div className="w-full md:w-96 border-r border-border bg-card flex flex-col">
-        {/* Header de chats */}
         <div className="p-4 border-b border-border">
           <h1 className="text-2xl font-bold text-foreground mb-4">Mensajes</h1>
           <div className="relative">
@@ -152,7 +195,6 @@ export default function ChatsClient() {
           </div>
         </div>
 
-        {/* Lista de chats */}
         <div className="flex-1 overflow-y-auto hidden md:block">
           {loading ? (
             <div className="p-4 text-center text-muted-foreground">Cargando chats...</div>
@@ -185,90 +227,96 @@ export default function ChatsClient() {
             ))
           )}
         </div>
-
-        {/* Mobile chat list */}
-        <div className="md:hidden flex-1 overflow-y-auto">
-          {loading ? (
-            <div className="p-4 text-center text-muted-foreground">Cargando chats...</div>
-          ) : filteredChats.length === 0 ? (
-            <div className="p-4 text-center text-muted-foreground">No hay conversaciones</div>
-          ) : (
-            filteredChats.map((chat) => (
-              <button
-                key={chat.id}
-                onClick={() => setSelectedChatId(chat.id)}
-                className={`w-full p-4 border-b border-border hover:bg-background transition-colors text-left ${selectedChatId === chat.id ? "bg-accent/10" : ""
-                  }`}
-              >
-                <div className="flex items-center gap-3">
-                  <div className="text-3xl">{chat.avatar}</div>
-                  <div className="flex-1">
-                    <div className="flex justify-between items-baseline gap-2">
-                      <h3 className="font-semibold text-foreground">{chat.name}</h3>
-                      <span className="text-xs text-muted-foreground">{chat.lastTime}</span>
-                    </div>
-                    <p className="text-xs text-muted-foreground truncate">{chat.lastMessage}</p>
-                  </div>
-                </div>
-              </button>
-            ))
-          )}
-        </div>
       </div>
 
-      {/* Área de chat */}
-      <div className="hidden md:flex flex-1 flex-col bg-background">
+      <div className="hidden md:flex flex-1 flex-col bg-background relative">
         {selectedChat ? (
           <>
-            {/* Chat header */}
-            <div className="p-4 border-b border-border flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="text-3xl">{selectedChat.avatar}</div>
-                <h2 className="text-lg font-semibold text-foreground">{selectedChat.name}</h2>
+            <div className="p-4 border-b border-border flex items-center justify-between shadow-sm z-10">
+              <div
+                className="flex items-center gap-3 cursor-pointer hover:bg-secondary/50 p-2 rounded-lg transition-transform"
+                onClick={() => router.push(`/usuario/${selectedChat.userId}`)}
+              >
+                <div className="text-3xl transition-transform">{selectedChat.avatar}</div>
+                <div>
+                  <h2 className="text-lg font-semibold text-foreground hover:underline">{selectedChat.name}</h2>
+                  <p className="text-xs text-muted-foreground">Ver perfil</p>
+                </div>
               </div>
-              <button className="p-2 hover:bg-secondary/20 rounded-lg transition-colors">
-                <Plus size={20} className="text-muted-foreground" />
+              <button
+                onClick={handleFinalize}
+                className="flex items-center gap-2 p-2 px-4 bg-green-500/10 hover:bg-green-500/20 text-green-600 rounded-lg transition-colors font-medium text-sm"
+              >
+                <CheckCircle size={18} />
+                Terminar Intercambio
               </button>
             </div>
 
-            {/* Mensajes */}
             <div className="flex-1 overflow-y-auto p-4 space-y-4">
-              {selectedChat.messages.map((message) => (
-                <div key={message.id} className={`flex ${message.sender === "me" ? "justify-end" : "justify-start"}`}>
-                  <div
-                    className={`max-w-xs px-4 py-2 rounded-lg ${message.sender === "me"
+              {selectedChat.messages.map((message) => {
+                if (message.isSystem) {
+                  return (
+                    <div key={message.id} className="flex justify-center w-full my-4">
+                      <div className="bg-secondary/50 text-muted-foreground text-xs font-semibold px-4 py-2 rounded-full border border-border/50 text-center shadow-sm">
+                        {message.text}
+                      </div>
+                    </div>
+                  );
+                }
+
+                return (
+                  <div key={message.id} className={`flex ${message.sender === "me" ? "justify-end" : "justify-start"}`}>
+                    <div
+                      className={`max-w-xs px-4 py-2 rounded-xl shadow-sm ${message.sender === "me"
                         ? "bg-accent text-accent-foreground rounded-br-none"
-                        : "bg-secondary/30 text-foreground rounded-bl-none"
-                      }`}
-                  >
-                    <p className="text-sm">{message.text}</p>
-                    <span className="text-xs opacity-70 block mt-1">{message.time}</span>
+                        : "bg-secondary text-foreground rounded-bl-none"
+                        }`}
+                    >
+                      {message.image && (
+                        <img src={message.image} alt="Adjunto" className="w-full max-w-full rounded-lg mb-2 border border-black/10" />
+                      )}
+                      {message.text && <p className="text-sm font-medium leading-relaxed">{message.text}</p>}
+                      <span className="text-[10px] opacity-70 block mt-1 text-right">{message.time}</span>
+                    </div>
                   </div>
-                </div>
-              ))}
+                )
+              })}
             </div>
 
-            {/* Input de mensaje */}
-            <form onSubmit={handleSendMessage} className="p-4 border-t border-border flex gap-2">
+            <form onSubmit={handleSendMessage} className="p-4 border-t border-border flex gap-2 bg-card">
+              <button
+                type="button"
+                onClick={handleSendImage}
+                className="p-3 bg-secondary/80 hover:bg-secondary text-foreground rounded-lg transition-colors shadow-sm"
+              >
+                <ImageIcon size={20} />
+              </button>
+
               <input
                 type="text"
                 value={messageText}
                 onChange={(e) => setMessageText(e.target.value)}
                 placeholder="Escribe un mensaje..."
-                className="flex-1 px-4 py-2 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-accent"
+                className="flex-1 px-4 py-3 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-accent shadow-inner text-sm font-medium"
               />
               <button
                 type="submit"
                 disabled={!messageText.trim()}
-                className="p-2 bg-accent hover:bg-accent/90 disabled:bg-accent/50 text-accent-foreground rounded-lg transition-colors"
+                className="p-3 bg-accent hover:bg-accent/90 disabled:bg-accent/50 text-accent-foreground rounded-lg transition-colors shadow-sm"
               >
                 <Send size={20} />
               </button>
             </form>
           </>
         ) : (
-          <div className="flex-1 flex items-center justify-center text-muted-foreground">
-            <p>{loading ? "Cargando..." : "Selecciona un chat para empezar"}</p>
+          <div className="flex-1 flex flex-col items-center justify-center text-muted-foreground bg-secondary/10">
+            <div className="p-6 bg-background rounded-2xl shadow-sm border border-border text-center flex flex-col items-center">
+              <div className="w-16 h-16 bg-accent/20 text-accent rounded-full flex items-center justify-center mb-4">
+                <Send size={30} />
+              </div>
+              <h2 className="text-xl font-bold text-foreground mb-1">¡Tus Mensajes!</h2>
+              <p className="max-w-[200px] text-sm">Selecciona una conversación a la izquierda para empezar.</p>
+            </div>
           </div>
         )}
       </div>

@@ -26,6 +26,10 @@ export async function GET(
             email: user.email,
             bio: user.bio || '',
             location: user.location || '',
+            avatar: user.avatar || '/placeholder.svg',
+            exchanges: user.exchanges || 0,
+            rating: user.rating || 0,
+            ratingCount: user.ratingCount || 0,
         }, { status: 200 });
     } catch (error) {
         console.error('Error fetching user:', error);
@@ -51,6 +55,7 @@ export async function PUT(
         if (body.email !== undefined) updateData.email = body.email;
         if (body.bio !== undefined) updateData.bio = body.bio;
         if (body.location !== undefined) updateData.location = body.location;
+        if (body.avatar !== undefined) updateData.avatar = body.avatar;
 
         const updatedUser = await User.findByIdAndUpdate(
             resolvedParams.id,
@@ -71,6 +76,10 @@ export async function PUT(
             email: updatedUser.email,
             bio: updatedUser.bio || '',
             location: updatedUser.location || '',
+            avatar: updatedUser.avatar || '/placeholder.svg',
+            exchanges: updatedUser.exchanges || 0,
+            rating: updatedUser.rating || 0,
+            ratingCount: updatedUser.ratingCount || 0,
         }, { status: 200 });
     } catch (error) {
         console.error('Error updating user:', error);

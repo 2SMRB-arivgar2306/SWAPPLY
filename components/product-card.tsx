@@ -29,36 +29,39 @@ export default function ProductCard({ product }) {
     setIsFav(!isFav)
   }
 
-  const handleContact = () => {
-    const chatsStorage = localStorage.getItem("swapply_chats")
-    const chats = chatsStorage ? JSON.parse(chatsStorage) : []
-
-    const chatExists = chats.find((c: any) => c.userId === product.user)
-
-    if (!chatExists) {
-      const newChat = {
-        id: Date.now(),
-        userId: product.user,
-        name: product.user,
-        avatar: "👤",
-        lastMessage: `Interesado en: ${product.title}`,
-        lastTime: new Date().toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" }),
-        unread: 0,
-        messages: [
-          {
-            id: 1,
-            sender: "me",
-            text: `Hola, me interesa tu ${product.title}. ¿Sigues disponible para intercambiar?`,
-            time: new Date().toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" }),
-          },
-        ],
-        productId: product.id,
-      }
-      chats.push(newChat)
-      localStorage.setItem("swapply_chats", JSON.stringify(chats))
+  const handleContact = async () => {
+    if (!product.userId) {
+      router.push(`/chats?user=${product.user}`)
+      return;
     }
 
-    router.push(`/chats?user=${product.user}`)
+    const cachedUser = localStorage.getItem('user');
+    if (!cachedUser) {
+      router.push('/login');
+      return;
+    }
+    const myUser = JSON.parse(cachedUser);
+
+    try {
+      const res = await fetch('/api/chats', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId: myUser.id,
+          otherUserId: product.userId,
+          name: product.user,
+          avatar: "👤",
+          initialMessage: `Hola, me interesa tu ${product.title}. ¿Sigues disponible para intercambiar?`
+        })
+      });
+
+      if (res.ok) {
+        router.push(`/chats`)
+      }
+    } catch (e) {
+      console.error(e);
+      router.push(`/chats`)
+    }
   }
 
   const handleProductClick = () => {

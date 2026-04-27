@@ -17,22 +17,37 @@ export async function GET(req: Request) {
         }
 
         await connectToDatabase();
-        const chats = await Chat.find({ userId }).sort({ createdAt: -1 });
+        const chats = await Chat.find({
+            $or: [{ userId: userId }, { otherUserId: userId }]
+        }).sort({ createdAt: -1 }).populate('userId otherUserId', 'name avatar');
 
-        const formatted = chats.map(chat => ({
-            id: chat._id,
-            name: chat.name,
-            avatar: chat.avatar,
-            lastMessage: chat.lastMessage,
-            lastTime: chat.lastTime,
-            unread: chat.unread,
-            messages: chat.messages.map((msg: any) => ({
-                id: msg._id,
-                sender: msg.sender,
-                text: msg.text,
-                time: msg.time,
-            })),
-        }));
+        const formatted = chats.map(chat => {
+            // Determine name and avatar based on if the current user is initiator or target
+            const isInitiator = String(chat.userId?._id) === userId;
+            const targetName = isInitiator ? chat.name : (chat.userId?.name || 'Usuario');
+            const targetAvatar = isInitiator ? chat.avatar : (chat.userId?.avatar || '👤');
+            const trueOtherUserId = isInitiator ? chat.otherUserId?._id : chat.userId?._id;
+
+            return {
+                id: chat._id,
+                userId: trueOtherUserId,
+                name: targetName,
+                avatar: targetAvatar,
+                lastMessage: chat.lastMessage,
+                lastTime: chat.lastTime,
+                unread: chat.unread,
+                messages: chat.messages.map((msg: any) => ({
+                    id: msg._id,
+                    sender: String(msg.sender) === 'me'
+                        ? (isInitiator ? 'me' : 'other')
+                        : (isInitiator ? 'other' : 'me'), // Flip perspectives
+                    text: msg.text,
+                    time: msg.time,
+                    image: msg.image,
+                    isSystem: msg.isSystem
+                })),
+            }
+        });
 
         return NextResponse.json(formatted, { status: 200 });
     } catch (error) {
@@ -56,28 +71,37 @@ export async function POST(req: Request) {
             );
         }
 
+        // Check if chat already exists
+        const existingChat = await Chat.findOne({
+            $or: [
+                { userId: body.userId, otherUserId: body.otherUserId },
+                { userId: body.otherUserId, otherUserId: body.userId }
+            ]
+        });
+
+        if (existingChat) {
+            return NextResponse.json({ message: 'Chat exists', chat: existingChat }, { status: 200 });
+        }
+
         const chat = await Chat.create({
             userId: body.userId,
+            otherUserId: body.otherUserId, // Ensure the partner sees it
             name: body.name,
             avatar: body.avatar || '👤',
-            lastMessage: '',
-            lastTime: '',
+            lastMessage: body.initialMessage || 'Interesado en tus artículos',
+            lastTime: new Date().toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" }),
             unread: 0,
-            messages: [],
+            messages: [{
+                sender: 'me',
+                text: body.initialMessage || 'Interesado en tus artículos',
+                time: new Date().toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" }),
+            }],
         });
 
         return NextResponse.json(
             {
                 message: 'Chat created',
-                chat: {
-                    id: chat._id,
-                    name: chat.name,
-                    avatar: chat.avatar,
-                    lastMessage: chat.lastMessage,
-                    lastTime: chat.lastTime,
-                    unread: chat.unread,
-                    messages: [],
-                }
+                chat: chat
             },
             { status: 201 }
         );

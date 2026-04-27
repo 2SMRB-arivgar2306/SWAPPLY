@@ -26,6 +26,22 @@ const UserSchema = new mongoose.Schema({
         maxlength: [100, 'Location cannot be more than 100 characters'],
         default: '',
     },
+    avatar: {
+        type: String,
+        default: '/placeholder.svg'
+    },
+    exchanges: {
+        type: Number,
+        default: 0
+    },
+    rating: {
+        type: Number,
+        default: 0
+    },
+    ratingCount: {
+        type: Number,
+        default: 0
+    },
     createdAt: {
         type: Date,
         default: Date.now,

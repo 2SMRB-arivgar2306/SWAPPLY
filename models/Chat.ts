@@ -14,6 +14,14 @@ const MessageSubSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
+    image: {
+        type: String,
+        required: false,
+    },
+    isSystem: {
+        type: Boolean,
+        default: false,
+    }
 }, { _id: true });
 
 const ChatSchema = new mongoose.Schema({
@@ -21,6 +29,11 @@ const ChatSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
         required: [true, 'User ID is required.'],
+    },
+    otherUserId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+        required: false,
     },
     name: {
         type: String,
