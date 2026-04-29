@@ -288,9 +288,9 @@ export default function ChatsClient() {
         </div>
       </div>
 
-      <div className={`flex-1 flex min-h-0 flex-col bg-background relative ${selectedChat ? "flex" : "hidden md:flex"}`}>
+      <div className={`flex-1 flex min-h-0 flex-col bg-background relative overflow-hidden ${selectedChat ? "flex" : "hidden md:flex"}`}>
         {selectedChat ? (
-          <div className="flex h-full min-h-0 flex-col">
+          <div className="flex h-full min-h-0 flex-col overflow-hidden">
             <div className="p-4 border-b border-border flex items-center justify-between shadow-sm z-10">
               <div className="flex items-center gap-3 md:hidden">
                 <button

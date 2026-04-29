@@ -23,7 +23,7 @@ export default function ChatsPage() {
   }
 
   return (
-    <main className="min-h-screen bg-background pb-16 md:pb-0 md:ml-16 flex">
+    <main className="h-screen min-h-screen bg-background pb-16 md:pb-0 md:ml-16 flex overflow-hidden">
       <Navigation />
       <ChatsClient />
     </main>
