@@ -290,7 +290,7 @@ export default function ChatsClient() {
 
       <div className={`flex-1 flex min-h-0 flex-col bg-background relative ${selectedChat ? "flex" : "hidden md:flex"}`}>
         {selectedChat ? (
-          <>
+          <div className="flex h-full min-h-0 flex-col">
             <div className="p-4 border-b border-border flex items-center justify-between shadow-sm z-10">
               <div className="flex items-center gap-3 md:hidden">
                 <button
@@ -358,52 +358,61 @@ export default function ChatsClient() {
               <div ref={messagesEndRef} />
             </div>
 
-            {selectedImage && (
-              <div className="px-4 py-2 bg-card border-t border-border flex justify-between items-end">
-                <div className="relative w-16 h-16 rounded-md overflow-hidden border border-border">
-                  <img src={selectedImage} alt="Preview" className="w-full h-full object-cover" />
+            <div className="border-t border-border bg-card p-4">
+              {selectedImage && (
+                <div className="mb-4 flex items-center justify-between rounded-xl border border-border p-3 bg-muted">
+                  <div className="flex items-center gap-3">
+                    <div className="relative w-16 h-16 rounded-md overflow-hidden border border-border">
+                      <img src={selectedImage} alt="Preview" className="w-full h-full object-cover" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-foreground">Imagen seleccionada</p>
+                      <p className="text-xs text-muted-foreground">Lista para enviar</p>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setSelectedImage(null)}
+                    className="text-red-500 text-xs font-semibold hover:underline"
+                  >
+                    Cancelar
+                  </button>
                 </div>
+              )}
+
+              <form onSubmit={handleSendMessage} className="flex gap-2">
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  className="hidden"
+                  accept="image/*"
+                  onChange={handleFileUpload}
+                />
                 <button
                   type="button"
-                  onClick={() => setSelectedImage(null)}
-                  className="text-red-500 text-xs font-semibold hover:underline"
+                  onClick={handleSendImageClick}
+                  className="p-3 bg-secondary/80 hover:bg-secondary text-foreground rounded-lg transition-colors shadow-sm"
                 >
-                  Cancelar foto
+                  <ImageIcon size={20} />
                 </button>
-              </div>
-            )}
-            <form onSubmit={handleSendMessage} className="p-4 border-t border-border flex gap-2 bg-card">
-              <input
-                type="file"
-                ref={fileInputRef}
-                className="hidden"
-                accept="image/*"
-                onChange={handleFileUpload}
-              />
-              <button
-                type="button"
-                onClick={handleSendImageClick}
-                className="p-3 bg-secondary/80 hover:bg-secondary text-foreground rounded-lg transition-colors shadow-sm"
-              >
-                <ImageIcon size={20} />
-              </button>
 
-              <input
-                type="text"
-                value={messageText}
-                onChange={(e) => setMessageText(e.target.value)}
-                placeholder="Escribe un mensaje..."
-                className="flex-1 px-4 py-3 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-accent shadow-inner text-sm font-medium"
-              />
-              <button
-                type="submit"
-                disabled={!messageText.trim()}
-                className="p-3 bg-accent hover:bg-accent/90 disabled:bg-accent/50 text-accent-foreground rounded-lg transition-colors shadow-sm"
-              >
-                <Send size={20} />
-              </button>
-            </form>
-          </>
+                <input
+                  type="text"
+                  value={messageText}
+                  onChange={(e) => setMessageText(e.target.value)}
+                  placeholder="Escribe un mensaje..."
+                  className="flex-1 px-4 py-3 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-accent shadow-inner text-sm font-medium"
+                />
+                <button
+                  type="submit"
+                  disabled={!messageText.trim() && !selectedImage}
+                  className="p-3 bg-accent hover:bg-accent/90 disabled:bg-accent/50 text-accent-foreground rounded-lg transition-colors shadow-sm"
+                >
+                  <Send size={20} />
+                </button>
+              </form>
+            </div>
+          </div>
         ) : (
           <div className="flex-1 flex flex-col items-center justify-center text-muted-foreground bg-secondary/10">
             <div className="p-6 bg-background rounded-2xl shadow-sm border border-border text-center flex flex-col items-center">
