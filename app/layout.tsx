@@ -5,6 +5,8 @@ import { Analytics } from "@vercel/analytics/next"
 import "./globals.css"
 import { FavoritesProvider } from "@/lib/favorites-context"
 import { ArticlesProvider } from "@/lib/articles-context"
+import { ThemeProvider } from "@/components/theme-provider"
+import { LocaleProvider } from "@/lib/locale-context"
 
 const poppins = Poppins({
   subsets: ["latin"],
@@ -47,9 +49,13 @@ export default function RootLayout({
   return (
     <html lang="es">
       <body className={`${poppins.className} antialiased`}>
-        <FavoritesProvider>
-          <ArticlesProvider>{children}</ArticlesProvider>
-        </FavoritesProvider>
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+          <LocaleProvider>
+            <FavoritesProvider>
+              <ArticlesProvider>{children}</ArticlesProvider>
+            </FavoritesProvider>
+          </LocaleProvider>
+        </ThemeProvider>
         <Analytics />
       </body>
     </html>

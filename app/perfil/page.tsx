@@ -5,6 +5,9 @@ import { useRouter } from "next/navigation"
 import Navigation from "@/components/navigation"
 import { LogOut, User } from "lucide-react"
 import { useArticles } from "@/lib/articles-context"
+import { LanguageSwitcher } from "@/components/language-switcher"
+import { ThemeToggle } from "@/components/theme-toggle"
+import { useLocale } from "@/lib/locale-context"
 
 export default function ProfilePage() {
   const router = useRouter()
@@ -12,6 +15,7 @@ export default function ProfilePage() {
   const [profileData, setProfileData] = useState<any>(null)
 
   const { articles } = useArticles()
+  const { dict } = useLocale()
 
   useEffect(() => {
     const storedUser = localStorage.getItem("user")
@@ -48,7 +52,7 @@ export default function ProfilePage() {
     return (
       <main className="min-h-screen bg-background pb-16 md:pb-0 md:ml-16 animate-pulse">
         <Navigation />
-        <div className="max-w-2xl mx-auto p-4 md:p-6 mt-10 text-center text-muted-foreground">Cargando tu perfil espectacular...</div>
+        <div className="max-w-2xl mx-auto p-4 md:p-6 mt-10 text-center text-muted-foreground">{dict.profile.loading}</div>
       </main>
     )
   }
@@ -91,17 +95,31 @@ export default function ProfilePage() {
         <div className="grid grid-cols-3 gap-4 mb-8">
           <div className="bg-card border border-border rounded-xl p-4 text-center shadow-sm hover:shadow-md transition-shadow">
             <div className="text-3xl font-bold text-accent">{profileData.exchanges || 0}</div>
-            <p className="text-xs text-muted-foreground mt-1 uppercase font-bold tracking-wider">Intercambios</p>
+            <p className="text-xs text-muted-foreground mt-1 uppercase font-bold tracking-wider">{dict.profile.exchanges}</p>
           </div>
           <div className="bg-card border border-border rounded-xl p-4 text-center shadow-sm hover:shadow-md transition-shadow">
             <div className="text-3xl font-bold text-accent">{profileData.rating ? profileData.rating.toFixed(1) : "0.0"}</div>
             <p className="text-xs text-muted-foreground mt-1 uppercase font-bold tracking-wider opacity-70">
-              ⭐ {profileData.ratingCount || 0} valoraciones
+              ⭐ {profileData.ratingCount || 0} {dict.profile.ratings}
             </p>
           </div>
           <div className="bg-card border border-border rounded-xl p-4 text-center shadow-sm hover:shadow-md transition-shadow">
             <div className="text-3xl font-bold text-accent">{exactArticlesCount}</div>
-            <p className="text-xs text-muted-foreground mt-1 uppercase font-bold tracking-wider">Artículos</p>
+            <p className="text-xs text-muted-foreground mt-1 uppercase font-bold tracking-wider">{dict.profile.articles}</p>
+          </div>
+        </div>
+
+        {/* Preferences */}
+        <div className="bg-card border border-border rounded-2xl p-6 mb-6 shadow-sm">
+          <h2 className="text-xl font-semibold text-foreground mb-4">{dict.profile.preferences}</h2>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="bg-background border border-border rounded-2xl p-4">
+              <LanguageSwitcher />
+            </div>
+            <div className="bg-background border border-border rounded-2xl p-4">
+              <div className="mb-3 text-sm font-medium text-muted-foreground">{dict.profile.theme}</div>
+              <ThemeToggle />
+            </div>
           </div>
         </div>
 
@@ -111,26 +129,26 @@ export default function ProfilePage() {
             onClick={handleEditProfile}
             className="w-full bg-accent/10 border border-accent/20 hover:bg-accent/20 text-accent font-semibold py-3 rounded-xl transition-all"
           >
-            Editar Perfil
+            {dict.profile.editProfile}
           </button>
           <button
             onClick={handleMyItems}
             className="w-full bg-card border border-border hover:bg-secondary/20 text-foreground font-semibold py-3 rounded-xl transition-all shadow-sm"
           >
-            Mis Artículos
+            {dict.profile.myItems}
           </button>
           <button
             onClick={handleFavorites}
             className="w-full bg-card border border-border hover:bg-secondary/20 text-foreground font-semibold py-3 rounded-xl transition-all shadow-sm"
           >
-            Favoritos
+            {dict.profile.favorites}
           </button>
           <button
             onClick={handleLogout}
             className="w-full mt-8 border border-red-500/20 text-red-500 hover:bg-red-500 hover:text-white font-semibold py-3 rounded-xl transition-all flex items-center justify-center gap-2"
           >
             <LogOut size={20} />
-            Cerrar sesión
+            {dict.profile.logout}
           </button>
         </div>
       </div>

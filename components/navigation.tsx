@@ -5,6 +5,7 @@ import Link from "next/link"
 import Image from "next/image"
 import { useRouter, usePathname } from "next/navigation"
 import { Home, MessageCircle, User, LogOut } from "lucide-react"
+import { useLocale } from "@/lib/locale-context"
 
 export default function Navigation() {
   const router = useRouter()
@@ -23,14 +24,16 @@ export default function Navigation() {
     router.push("/auth/login")
   }
 
+  const { dict } = useLocale()
+
   if (!user || pathname.startsWith("/auth")) {
     return null
   }
 
   const navItems = [
-    { href: "/", icon: Home, label: "Inicio", id: "home" },
-    { href: "/chats", icon: MessageCircle, label: "Chats", id: "chats" },
-    { href: "/perfil", icon: User, label: "Perfil", id: "perfil" },
+    { href: "/", icon: Home, label: dict.nav.home, id: "home" },
+    { href: "/chats", icon: MessageCircle, label: dict.nav.chats, id: "chats" },
+    { href: "/perfil", icon: User, label: dict.nav.profile, id: "perfil" },
   ]
 
   return (
@@ -57,7 +60,7 @@ export default function Navigation() {
           className="flex flex-col items-center justify-center w-16 h-16 text-muted-foreground hover:text-red-500 transition-colors"
         >
           <LogOut size={24} />
-          <span className="text-xs mt-1">Salir</span>
+          <span className="text-xs mt-1">{dict.nav.logout}</span>
         </button>
       </div>
 
