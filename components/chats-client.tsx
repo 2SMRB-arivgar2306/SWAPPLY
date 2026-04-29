@@ -237,7 +237,7 @@ export default function ChatsClient() {
 
   return (
     <>
-      <div className={`w-full md:w-96 border-r border-border bg-card flex flex-col ${selectedChat ? "hidden md:flex" : "flex"}`}>
+      <div className={`w-full md:w-96 border-r border-border bg-card flex flex-col min-h-0 ${selectedChat ? "hidden md:flex" : "flex"}`}>
         <div className="p-4 border-b border-border">
           <h1 className="text-2xl font-bold text-foreground mb-4">Mensajes</h1>
           <div className="relative">
@@ -252,7 +252,7 @@ export default function ChatsClient() {
           </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto">
+        <div className="flex-1 min-h-0 overflow-y-auto">
           {loading ? (
             <div className="p-4 text-center text-muted-foreground">Cargando chats...</div>
           ) : filteredChats.length === 0 ? (
@@ -288,7 +288,7 @@ export default function ChatsClient() {
         </div>
       </div>
 
-      <div className={`flex-1 flex-col bg-background relative ${selectedChat ? "flex" : "hidden md:flex"}`}>
+      <div className={`flex-1 flex min-h-0 flex-col bg-background relative ${selectedChat ? "flex" : "hidden md:flex"}`}>
         {selectedChat ? (
           <>
             <div className="p-4 border-b border-border flex items-center justify-between shadow-sm z-10">
