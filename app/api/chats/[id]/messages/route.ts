@@ -13,7 +13,7 @@ export async function POST(
         const resolvedParams = await params;
         const body = await request.json();
 
-        if (!body.sender || !body.text || !body.time) {
+        if (!body.sender || !body.time || (!body.text && !body.image)) {
             return NextResponse.json(
                 { message: 'Missing required fields' },
                 { status: 400 }
