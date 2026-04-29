@@ -2,8 +2,8 @@
 
 import { useState, useRef, useEffect } from "react"
 import type React from "react"
-import { Search, Plus, Send, Image as ImageIcon, CheckCircle, Star } from "lucide-react"
-import { useRouter } from "next/navigation"
+import { Search, Plus, Send, Image as ImageIcon, CheckCircle, Star, ArrowLeft } from "lucide-react"
+import { useRouter, useSearchParams } from "next/navigation"
 
 interface Chat {
   id: string
@@ -29,6 +29,7 @@ interface Message {
 
 export default function ChatsClient() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const fileInputRef = useRef<HTMLInputElement>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
@@ -82,7 +83,15 @@ export default function ChatsClient() {
       if (res.ok) {
         const data = await res.json()
         setChats(data)
-        if (data.length > 0 && !selectedChatId) {
+
+        const targetUser = searchParams.get("user")
+        const matchedChat = targetUser
+          ? data.find((chat: Chat) => chat.userId === targetUser || chat.name === targetUser)
+          : undefined
+
+        if (matchedChat) {
+          setSelectedChatId(matchedChat.id)
+        } else if (data.length > 0 && !selectedChatId) {
           setSelectedChatId(data[0].id)
         }
       }
@@ -217,7 +226,7 @@ export default function ChatsClient() {
 
   return (
     <>
-      <div className="w-full md:w-96 border-r border-border bg-card flex flex-col">
+      <div className={`w-full md:w-96 border-r border-border bg-card flex flex-col ${selectedChat ? "hidden md:flex" : "flex"}`}>
         <div className="p-4 border-b border-border">
           <h1 className="text-2xl font-bold text-foreground mb-4">Mensajes</h1>
           <div className="relative">
@@ -268,10 +277,19 @@ export default function ChatsClient() {
         </div>
       </div>
 
-      <div className="hidden md:flex flex-1 flex-col bg-background relative">
+      <div className={`flex-1 flex-col bg-background relative ${selectedChat ? "flex" : "hidden md:flex"}`}>
         {selectedChat ? (
           <>
             <div className="p-4 border-b border-border flex items-center justify-between shadow-sm z-10">
+              <div className="flex items-center gap-3 md:hidden">
+                <button
+                  type="button"
+                  onClick={() => setSelectedChatId(null)}
+                  className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  <ArrowLeft size={18} /> Volver
+                </button>
+              </div>
               <div
                 className="flex items-center gap-3 cursor-pointer hover:bg-secondary/50 p-2 rounded-lg transition-transform max-w-[60%]"
                 onClick={() => router.push(`/usuario/${selectedChat.userId}`)}

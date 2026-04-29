@@ -56,7 +56,7 @@ export default function ProductCard({ product }) {
       });
 
       if (res.ok) {
-        router.push(`/chats`)
+        router.push(`/chats?user=${product.userId || product.user}`)
       }
     } catch (e) {
       console.error(e);

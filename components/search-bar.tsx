@@ -16,7 +16,7 @@ export default function SearchBar({ searchTerm, setSearchTerm, selectedCategory,
     <div className="bg-card border-b border-border sticky top-0 z-40">
       <div className="max-w-7xl mx-auto px-4 py-6">
         {/* Barra de búsqueda */}
-        <div className="flex gap-2 mb-4">
+        <div className="flex flex-col sm:flex-row gap-2 mb-4">
           <div className="flex-1 flex items-center bg-muted rounded-lg px-4 py-3 border border-border">
             <Search size={18} className="text-muted-foreground mr-2" />
             <input
@@ -27,7 +27,7 @@ export default function SearchBar({ searchTerm, setSearchTerm, selectedCategory,
               className="bg-transparent flex-1 outline-none text-foreground placeholder-muted-foreground"
             />
           </div>
-          <button className="bg-primary text-primary-foreground px-6 py-3 rounded-lg hover:bg-primary/90 transition-colors font-medium">
+          <button className="w-full sm:w-auto bg-primary text-primary-foreground px-6 py-3 rounded-lg hover:bg-primary/90 transition-colors font-medium">
             Buscar
           </button>
         </div>
