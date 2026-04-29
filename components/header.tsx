@@ -25,7 +25,9 @@ export default function Header() {
         <div className="flex items-center justify-between">
           {/* Logo y nombre */}
           <Link href="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
-            <Image src="/logo-swapply.png" alt="Swapply" width={40} height={40} className="w-10 h-10" priority />
+            <div className="w-12 h-12 rounded-full bg-zinc-950/90 flex items-center justify-center shadow-sm">
+              <Image src="/logo-swapply.png" alt="Swapply" width={40} height={40} className="w-10 h-10" priority />
+            </div>
             <div>
               <h1 className="text-2xl font-bold text-primary">Swapply</h1>
               <p className="text-xs text-muted-foreground">Cambia todo, gasta nada...</p>

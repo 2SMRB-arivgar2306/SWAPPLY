@@ -2,13 +2,14 @@
 
 import type React from "react"
 
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { useRouter } from "next/navigation"
 import Navigation from "@/components/navigation"
 import { ArrowLeft } from "lucide-react"
 
 export default function EditarPerfilPage() {
   const router = useRouter()
+  const fileInputRef = useRef<HTMLInputElement | null>(null)
   const [user, setUser] = useState<any>(null)
   const [formData, setFormData] = useState({
     name: "",
@@ -56,6 +57,33 @@ export default function EditarPerfilPage() {
     setFormData((prev) => ({ ...prev, [name]: value }))
   }
 
+  const handleAvatarFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    if (!file.type.startsWith("image/")) {
+      setError("Por favor selecciona una imagen válida.")
+      return
+    }
+    if (file.size > 1_500_000) {
+      setError("La imagen es demasiado grande. Usa una imagen menor a 1.5 MB.")
+      return
+    }
+
+    const reader = new FileReader()
+    reader.onload = (event) => {
+      const result = event.target?.result
+      if (typeof result === "string") {
+        setFormData((prev) => ({ ...prev, avatar: result }))
+        setError("")
+      }
+    }
+    reader.readAsDataURL(file)
+  }
+
+  const handleAvatarUpload = () => {
+    fileInputRef.current?.click()
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
@@ -90,6 +118,7 @@ export default function EditarPerfilPage() {
         email: updatedUser.email,
         bio: updatedUser.bio,
         location: updatedUser.location,
+        avatar: updatedUser.avatar,
       }))
 
       setSuccess("Perfil actualizado correctamente")
@@ -135,18 +164,24 @@ export default function EditarPerfilPage() {
               <img src={formData.avatar} alt="Avatar" className="w-16 h-16 rounded-full object-cover border border-border" />
             )}
             <div className="flex-1">
-              <label htmlFor="avatar" className="block text-sm font-medium text-foreground mb-2">
-                URL de imagen de perfil (Avatar)
-              </label>
+              <label className="block text-sm font-medium text-foreground mb-2">Foto de perfil</label>
               <input
-                id="avatar"
-                type="text"
-                name="avatar"
-                value={formData.avatar}
-                onChange={handleChange}
-                placeholder="https://..."
-                className="w-full px-4 py-3 bg-card border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-accent transition-colors"
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={handleAvatarFileChange}
               />
+              <button
+                type="button"
+                onClick={handleAvatarUpload}
+                className="w-full bg-accent/10 border border-accent/20 hover:bg-accent/20 text-accent font-semibold py-3 rounded-lg transition-colors"
+              >
+                Seleccionar imagen
+              </button>
+              <p className="mt-2 text-xs text-muted-foreground">
+                Selecciona una imagen para tu avatar. La foto se almacenará directamente en tu perfil.
+              </p>
             </div>
           </div>
 

@@ -38,7 +38,9 @@ export default function Home() {
       <main className="min-h-screen bg-background flex flex-col items-center justify-center p-4">
         <div className="flex flex-col items-center max-w-lg w-full text-center space-y-10">
           <div className="flex justify-center">
-            <Image src="/logo-swapply.png" alt="Swapply" width={160} height={160} className="w-40 h-40 drop-shadow-md" priority />
+            <div className="w-40 h-40 rounded-full bg-zinc-950/90 flex items-center justify-center shadow-lg">
+              <Image src="/logo-swapply.png" alt="Swapply" width={160} height={160} className="w-40 h-40" priority />
+            </div>
           </div>
           <div className="space-y-4">
             <h1 className="text-4xl md:text-5xl font-extrabold text-accent leading-tight">
@@ -66,10 +68,10 @@ export default function Home() {
     <main className="min-h-screen bg-background pb-16 md:pb-0 md:ml-16">
       <Navigation />
       <Header />
-      <div className="bg-gradient-to-r from-secondary to-secondary/80 px-4 py-6">
+      <div className="bg-gradient-to-r from-secondary/95 via-secondary/90 to-secondary/95 px-4 py-10 text-white shadow-xl">
         <div className="max-w-7xl mx-auto">
-          <h2 className="text-3xl md:text-4xl font-bold text-accent mb-2">Cambia todo, gasta nada...</h2>
-          <p className="text-secondary-foreground text-lg">
+          <h2 className="text-3xl md:text-4xl font-bold text-white mb-2">Cambia todo, gasta nada...</h2>
+          <p className="text-white/80 text-lg">
             Intercambia tus artículos favoritos con la comunidad Swapply
           </p>
         </div>

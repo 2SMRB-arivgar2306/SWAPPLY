@@ -33,7 +33,11 @@ export default function ChatsClient() {
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
   const renderAvatar = (avatarStr: string) => {
-    const isUrl = avatarStr?.startsWith('http') || avatarStr?.startsWith('data:');
+    const isUrl =
+      avatarStr?.startsWith("http") ||
+      avatarStr?.startsWith("data:") ||
+      avatarStr?.startsWith("/") ||
+      /\.(jpg|jpeg|png|webp|gif|svg)(\?.*)?$/i.test(avatarStr || "")
     if (isUrl) {
       return <img src={avatarStr} alt="Avatar" className="w-full h-full object-cover rounded-full" />
     }

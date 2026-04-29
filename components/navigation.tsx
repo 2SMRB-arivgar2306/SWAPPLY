@@ -67,7 +67,9 @@ export default function Navigation() {
       {/* Desktop view */}
       <div className="hidden md:flex flex-col items-center py-6 gap-8 h-screen">
         <Link href="/" className="hover:opacity-80 transition-opacity">
-          <Image src="/logo-swapply.png" alt="Swapply" width={48} height={48} className="w-12 h-12" priority />
+          <div className="w-14 h-14 rounded-full bg-zinc-950/90 flex items-center justify-center shadow-sm">
+            <Image src="/logo-swapply.png" alt="Swapply" width={48} height={48} className="w-12 h-12" priority />
+          </div>
         </Link>
         <div className="flex flex-col gap-4">
           {navItems.map((item) => {
