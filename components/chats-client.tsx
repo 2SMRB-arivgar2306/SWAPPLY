@@ -52,6 +52,7 @@ export default function ChatsClient() {
   const [messageText, setMessageText] = useState("")
   const [selectedImage, setSelectedImage] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
+  const [isDesktop, setIsDesktop] = useState(false)
 
   useEffect(() => {
     const stored = localStorage.getItem("user")
@@ -66,6 +67,16 @@ export default function ChatsClient() {
   }, [])
 
   useEffect(() => {
+    const handleResize = () => {
+      setIsDesktop(window.matchMedia("(min-width: 768px)").matches)
+    }
+
+    handleResize()
+    window.addEventListener("resize", handleResize)
+    return () => window.removeEventListener("resize", handleResize)
+  }, [])
+
+  useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
   }, [chats, selectedChatId])
 
@@ -73,7 +84,7 @@ export default function ChatsClient() {
     if (userId) {
       fetchChats()
     }
-  }, [userId])
+  }, [userId, isDesktop])
 
   const fetchChats = async () => {
     if (!userId) return
@@ -91,7 +102,7 @@ export default function ChatsClient() {
 
         if (matchedChat) {
           setSelectedChatId(matchedChat.id)
-        } else if (data.length > 0 && !selectedChatId) {
+        } else if (data.length > 0 && !selectedChatId && isDesktop) {
           setSelectedChatId(data[0].id)
         }
       }
@@ -241,7 +252,7 @@ export default function ChatsClient() {
           </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto hidden md:block">
+        <div className="flex-1 overflow-y-auto">
           {loading ? (
             <div className="p-4 text-center text-muted-foreground">Cargando chats...</div>
           ) : filteredChats.length === 0 ? (
