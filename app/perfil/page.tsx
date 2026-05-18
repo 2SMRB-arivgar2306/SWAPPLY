@@ -96,11 +96,6 @@ export default function ProfilePage() {
           <div className="inline-flex items-center justify-center bg-accent/10 text-accent rounded-full px-4 py-1 text-xs font-semibold mb-2">
             {profileData.plan === 'premium' ? 'Plan Premium' : profileData.plan === 'medio' ? 'Plan Medio' : 'Plan Gratis'}
           </div>
-          {!profileData.isVerified && (
-            <div className="inline-flex items-center justify-center bg-orange-100 text-orange-700 rounded-full px-4 py-1 text-xs font-semibold mb-2">
-              Correo no verificado
-            </div>
-          )}
         </div>
 
         {/* Stats */}
@@ -149,14 +144,6 @@ export default function ProfilePage() {
           >
             Cambiar plan
           </button>
-          {!profileData.isVerified && (
-            <button
-              onClick={() => router.push('/auth/verify-email')}
-              className="w-full bg-orange-500 text-white hover:bg-orange-600 font-semibold py-3 rounded-xl transition-all"
-            >
-              Verificar correo
-            </button>
-          )}
           <button
             onClick={handleMyItems}
             className="w-full bg-card border border-border hover:bg-secondary/20 text-foreground font-semibold py-3 rounded-xl transition-all shadow-sm"

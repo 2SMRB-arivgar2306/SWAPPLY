@@ -2,13 +2,9 @@ import { NextResponse } from 'next/server';
 import connectToDatabase from '@/lib/mongodb';
 import User from '@/models/User';
 import bcrypt from 'bcryptjs';
-import { sendVerificationEmail } from '@/lib/email';
+// verification removed: email helper deleted
 
 export const dynamic = 'force-dynamic';
-
-function generateVerificationCode() {
-    return Math.floor(100000 + Math.random() * 900000).toString();
-}
 
 export async function POST(req: Request) {
     try {
@@ -38,7 +34,6 @@ export async function POST(req: Request) {
             );
         }
 
-        const verificationCode = generateVerificationCode();
         const hashedPassword = await bcrypt.hash(password, 10);
         const user = await User.create({
             name,
@@ -46,19 +41,11 @@ export async function POST(req: Request) {
             password: hashedPassword,
             location: location || '',
             plan: '',
-            isVerified: false,
-            verificationCode,
         });
-
-        const emailSent = await sendVerificationEmail(email, name, verificationCode);
-        if (!emailSent) {
-            console.warn('No se pudo enviar el correo de verificación.');
-        }
 
         return NextResponse.json(
             {
-                message: 'Registro exitoso. Revisa tu correo para verificar tu cuenta.',
-                emailSent: !!emailSent,
+                message: 'Registro exitoso',
                 user: {
                     id: user._id.toString(),
                     name: user.name,
@@ -66,7 +53,6 @@ export async function POST(req: Request) {
                     bio: user.bio || '',
                     location: user.location || '',
                     plan: user.plan || '',
-                    isVerified: user.isVerified,
                 },
             },
             { status: 201 }

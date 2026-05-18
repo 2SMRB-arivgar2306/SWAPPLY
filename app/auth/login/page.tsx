@@ -44,9 +44,7 @@ export default function LoginPage() {
       }
 
       localStorage.setItem("user", JSON.stringify(data.user));
-      if (!data.user.isVerified) {
-        window.location.href = "/auth/verify-email";
-      } else if (!data.user.plan) {
+      if (!data.user.plan) {
         window.location.href = "/auth/select-plan";
       } else {
         window.location.href = "/";

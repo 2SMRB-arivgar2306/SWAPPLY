@@ -35,14 +35,6 @@ const UserSchema = new mongoose.Schema({
         enum: ['free', 'medio', 'premium', ''],
         default: ''
     },
-    isVerified: {
-        type: Boolean,
-        default: false
-    },
-    verificationCode: {
-        type: String,
-        default: ''
-    },
     exchanges: {
         type: Number,
         default: 0

@@ -57,11 +57,6 @@ export default function SelectPlanPage() {
 
     const parsed = JSON.parse(storedUser)
     setUser(parsed)
-    if (!parsed.isVerified) {
-      router.push('/auth/verify-email')
-      return
-    }
-
     if (parsed.plan) {
       router.push("/")
     }

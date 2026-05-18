@@ -50,7 +50,6 @@ export async function POST(req: Request) {
                     bio: user.bio || '',
                     location: user.location || '',
                     plan: user.plan || '',
-                    isVerified: user.isVerified || false,
                 },
             },
             { status: 200 }
