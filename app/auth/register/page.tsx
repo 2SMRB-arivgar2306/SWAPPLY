@@ -62,7 +62,7 @@ export default function RegisterPage() {
       }
 
       localStorage.setItem("user", JSON.stringify(data.user))
-      window.location.href = "/auth/select-plan"
+      window.location.href = "/auth/verify-email"
     } catch (err: any) {
       setError(err.message || "No se pudo registrar el usuario")
     } finally {

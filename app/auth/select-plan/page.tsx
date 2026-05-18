@@ -57,6 +57,11 @@ export default function SelectPlanPage() {
 
     const parsed = JSON.parse(storedUser)
     setUser(parsed)
+    if (!parsed.isVerified) {
+      router.push('/auth/verify-email')
+      return
+    }
+
     if (parsed.plan) {
       router.push("/")
     }
@@ -67,29 +72,35 @@ export default function SelectPlanPage() {
     setLoading(true)
     setError("")
 
-    try {
-      const res = await fetch(`/api/users/${user.id}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ plan }),
-      })
+    if (plan === 'free') {
+      try {
+        const res = await fetch(`/api/users/${user.id}`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ plan }),
+        })
 
-      if (!res.ok) {
-        const data = await res.json()
-        throw new Error(data.message || "No se pudo guardar el plan")
+        if (!res.ok) {
+          const data = await res.json()
+          throw new Error(data.message || "No se pudo guardar el plan")
+        }
+
+        const updatedUser = await res.json()
+        const newUser = { ...user, plan: updatedUser.plan || plan }
+        localStorage.setItem("user", JSON.stringify(newUser))
+        window.location.href = "/"
+      } catch (err: any) {
+        setError(err.message || "Error al guardar el plan")
+      } finally {
+        setLoading(false)
       }
-
-      const updatedUser = await res.json()
-      const newUser = { ...user, plan: updatedUser.plan || plan }
-      localStorage.setItem("user", JSON.stringify(newUser))
-      window.location.href = "/"
-    } catch (err: any) {
-      setError(err.message || "Error al guardar el plan")
-    } finally {
-      setLoading(false)
+      return
     }
+
+    setLoading(false)
+    router.push(`/auth/payment?plan=${plan}`)
   }
 
   return (
