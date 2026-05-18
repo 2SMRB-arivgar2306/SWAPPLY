@@ -15,6 +15,7 @@ export default function RegisterPage() {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [confirmPassword, setConfirmPassword] = useState("")
+  const [location, setLocation] = useState("")
   const [error, setError] = useState("")
   const [loading, setLoading] = useState(false)
 
@@ -51,7 +52,7 @@ export default function RegisterPage() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ name, email, password }),
+        body: JSON.stringify({ name, email, password, location }),
       })
 
       const data = await res.json()
@@ -61,7 +62,7 @@ export default function RegisterPage() {
       }
 
       localStorage.setItem("user", JSON.stringify(data.user))
-      window.location.href = "/"
+      window.location.href = "/auth/select-plan"
     } catch (err: any) {
       setError(err.message || "No se pudo registrar el usuario")
     } finally {
@@ -112,6 +113,39 @@ export default function RegisterPage() {
               placeholder="tu@email.com"
               className="w-full px-4 py-3 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-accent transition-colors"
             />
+          </div>
+
+          <div>
+            <label htmlFor="location" className="block text-sm font-medium text-foreground mb-2">
+              Ciudad
+            </label>
+            <select
+              id="location"
+              value={location}
+              onChange={(e) => setLocation(e.target.value)}
+              className="w-full px-4 py-3 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-accent transition-colors"
+            >
+              <option value="">Selecciona tu ciudad</option>
+              <option value="Madrid">Madrid</option>
+              <option value="Barcelona">Barcelona</option>
+              <option value="Valencia">Valencia</option>
+              <option value="Sevilla">Sevilla</option>
+              <option value="Zaragoza">Zaragoza</option>
+              <option value="Málaga">Málaga</option>
+              <option value="Murcia">Murcia</option>
+              <option value="Palma">Palma</option>
+              <option value="Las Palmas">Las Palmas</option>
+              <option value="Bilbao">Bilbao</option>
+              <option value="Alicante">Alicante</option>
+              <option value="Córdoba">Córdoba</option>
+              <option value="Valladolid">Valladolid</option>
+              <option value="Vigo">Vigo</option>
+              <option value="Gijón">Gijón</option>
+              <option value="Hospitalet">L'Hospitalet</option>
+              <option value="La Coruña">La Coruña</option>
+              <option value="Granada">Granada</option>
+              <option value="Oviedo">Oviedo</option>
+            </select>
           </div>
 
           <div>

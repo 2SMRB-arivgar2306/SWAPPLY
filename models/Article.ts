@@ -27,6 +27,22 @@ const ArticleSchema = new mongoose.Schema({
         type: String,
         required: [false, 'Please provide an image URL.'],
     },
+    price: {
+        type: Number,
+        default: 0,
+    },
+    location: {
+        type: String,
+        required: [true, 'Please provide a location for this article.'],
+    },
+    features: {
+        type: String,
+        default: '',
+    },
+    sellerPlan: {
+        type: String,
+        default: 'free',
+    },
     userId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',

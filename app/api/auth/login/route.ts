@@ -49,6 +49,7 @@ export async function POST(req: Request) {
                     email: user.email,
                     bio: user.bio || '',
                     location: user.location || '',
+                    plan: user.plan || '',
                 },
             },
             { status: 200 }

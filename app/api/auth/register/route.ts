@@ -7,7 +7,7 @@ export const dynamic = 'force-dynamic';
 
 export async function POST(req: Request) {
     try {
-        const { name, email, password } = await req.json();
+        const { name, email, password, location } = await req.json();
 
         if (!name || !email || !password) {
             return NextResponse.json(
@@ -38,6 +38,8 @@ export async function POST(req: Request) {
             name,
             email,
             password: hashedPassword,
+            location: location || '',
+            plan: '',
         });
 
         return NextResponse.json(
@@ -49,6 +51,7 @@ export async function POST(req: Request) {
                     email: user.email,
                     bio: user.bio || '',
                     location: user.location || '',
+                    plan: user.plan || '',
                 },
             },
             { status: 201 }

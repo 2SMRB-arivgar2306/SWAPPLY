@@ -2,18 +2,45 @@
 import ProductCard from "./product-card"
 import { useArticles } from "@/lib/articles-context"
 
-export default function ProductGrid({ searchTerm, selectedCategory }: { searchTerm: string, selectedCategory: string }) {
+export default function ProductGrid({
+  searchTerm,
+  selectedCategory,
+  filterCity,
+  filterCondition,
+  minPrice,
+  maxPrice,
+}: {
+  searchTerm: string
+  selectedCategory: string
+  filterCity: string
+  filterCondition: string
+  minPrice: string
+  maxPrice: string
+}) {
   const { articles } = useArticles()
 
-  const filteredProducts = articles.filter((product: any) => {
-    const searchLower = searchTerm.toLowerCase()
-    const titleMatch = product.title?.toLowerCase().includes(searchLower) || false
-    const wantsMatch = product.wantsFor?.toLowerCase().includes(searchLower) || false
-    const matchesSearch = titleMatch || wantsMatch
-    const matchesCategory = selectedCategory === "all" || product.category === selectedCategory
+  const filteredProducts = articles
+    .filter((product: any) => {
+      const searchLower = searchTerm.toLowerCase()
+      const titleMatch = product.title?.toLowerCase().includes(searchLower) || false
+      const wantsMatch = product.wantsFor?.toLowerCase().includes(searchLower) || false
+      const descriptionMatch = product.description?.toLowerCase().includes(searchLower) || false
+      const featuresMatch = product.features?.toLowerCase().includes(searchLower) || false
+      const matchesSearch = !searchTerm || titleMatch || wantsMatch || descriptionMatch || featuresMatch
+      const matchesCategory = selectedCategory === "all" || product.category === selectedCategory
+      const matchesCity = filterCity === "all" || product.location === filterCity
+      const matchesCondition = filterCondition === "all" || product.condition === filterCondition
+      const matchesPrice =
+        (!minPrice || product.price >= Number(minPrice)) &&
+        (!maxPrice || product.price <= Number(maxPrice))
 
-    return matchesSearch && matchesCategory
-  })
+      return matchesSearch && matchesCategory && matchesCity && matchesCondition && matchesPrice
+    })
+    .sort((a: any, b: any) => {
+      const aPremium = a.sellerPlan === "premium" ? 0 : 1
+      const bPremium = b.sellerPlan === "premium" ? 0 : 1
+      return aPremium - bPremium
+    })
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">

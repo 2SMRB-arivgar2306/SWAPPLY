@@ -47,7 +47,13 @@ export default function EditarArticuloPage() {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     if (formData) {
       const { name, value } = e.target
-      setFormData((prev) => (prev ? { ...prev, [name]: value } : null))
+      setFormData((prev) => {
+        if (!prev) return null
+        return {
+          ...prev,
+          [name]: name === "price" ? Number(value) : value,
+        }
+      })
     }
   }
 
@@ -65,6 +71,9 @@ export default function EditarArticuloPage() {
       condition: formData.condition,
       wantsFor: formData.wantsFor,
       image: formData.image,
+      price: formData.price,
+      location: formData.location,
+      features: formData.features,
     })
 
     if (saved) {
@@ -171,6 +180,64 @@ export default function EditarArticuloPage() {
                 <option value="buen-estado">Buen estado</option>
                 <option value="estado-normal">Estado normal</option>
               </select>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+            <div>
+              <label htmlFor="location" className="block text-sm font-medium text-foreground mb-2">
+                Ciudad
+              </label>
+              <select
+                id="location"
+                name="location"
+                value={formData.location}
+                onChange={handleChange}
+                required
+                className="w-full px-4 py-3 bg-card border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-accent transition-colors"
+              >
+                <option value="">Selecciona la ciudad</option>
+                <option value="Madrid">Madrid</option>
+                <option value="Barcelona">Barcelona</option>
+                <option value="Valencia">Valencia</option>
+                <option value="Sevilla">Sevilla</option>
+                <option value="Zaragoza">Zaragoza</option>
+                <option value="Málaga">Málaga</option>
+                <option value="Murcia">Murcia</option>
+                <option value="Palma">Palma</option>
+                <option value="Las Palmas">Las Palmas</option>
+                <option value="Bilbao">Bilbao</option>
+              </select>
+            </div>
+
+            <div>
+              <label htmlFor="price" className="block text-sm font-medium text-foreground mb-2">
+                Precio
+              </label>
+              <input
+                id="price"
+                name="price"
+                type="number"
+                min="0"
+                value={formData.price}
+                onChange={handleChange}
+                className="w-full px-4 py-3 bg-card border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-accent transition-colors"
+              />
+            </div>
+
+            <div>
+              <label htmlFor="features" className="block text-sm font-medium text-foreground mb-2">
+                Características
+              </label>
+              <input
+                id="features"
+                name="features"
+                type="text"
+                value={formData.features}
+                onChange={handleChange}
+                placeholder="Ej: Color, marca, tamaño"
+                className="w-full px-4 py-3 bg-card border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-accent transition-colors"
+              />
             </div>
           </div>
 

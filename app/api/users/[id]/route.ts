@@ -26,6 +26,7 @@ export async function GET(
             email: user.email,
             bio: user.bio || '',
             location: user.location || '',
+            plan: user.plan || 'free',
             avatar: user.avatar || '/placeholder.svg',
             exchanges: user.exchanges || 0,
             rating: user.rating || 0,
@@ -56,6 +57,7 @@ export async function PUT(
         if (body.bio !== undefined) updateData.bio = body.bio;
         if (body.location !== undefined) updateData.location = body.location;
         if (body.avatar !== undefined) updateData.avatar = body.avatar;
+        if (body.plan !== undefined) updateData.plan = body.plan;
 
         const updatedUser = await User.findByIdAndUpdate(
             resolvedParams.id,

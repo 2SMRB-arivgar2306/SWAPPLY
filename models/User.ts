@@ -30,6 +30,11 @@ const UserSchema = new mongoose.Schema({
         type: String,
         default: '/placeholder.svg'
     },
+    plan: {
+        type: String,
+        enum: ['free', 'medio', 'premium', ''],
+        default: ''
+    },
     exchanges: {
         type: Number,
         default: 0

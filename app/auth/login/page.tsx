@@ -43,9 +43,12 @@ export default function LoginPage() {
         throw new Error(data.message || 'Error al iniciar sesión');
       }
 
-      // Success
       localStorage.setItem("user", JSON.stringify(data.user));
-      window.location.href = "/";
+      if (!data.user.plan) {
+        window.location.href = "/auth/select-plan";
+      } else {
+        window.location.href = "/";
+      }
     } catch (err: any) {
       setError(err.message || "Credenciales incorrectas o error de servidor");
     } finally {

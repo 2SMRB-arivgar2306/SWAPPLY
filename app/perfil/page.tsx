@@ -89,6 +89,9 @@ export default function ProfilePage() {
               📍 {profileData.location}
             </div>
           )}
+          <div className="inline-flex items-center justify-center bg-accent/10 text-accent rounded-full px-4 py-1 text-xs font-semibold mb-2">
+            {profileData.plan === 'premium' ? 'Plan Premium' : profileData.plan === 'medio' ? 'Plan Medio' : 'Plan Gratis'}
+          </div>
         </div>
 
         {/* Stats */}

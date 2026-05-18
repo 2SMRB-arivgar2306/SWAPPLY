@@ -24,13 +24,16 @@ export async function GET(
             id: article._id.toString(),
             userId: article.userId?._id?.toString ? article.userId._id.toString() : (article.userId ? article.userId.toString() : ''),
             user: article.userId?.name || 'Usuario',
-            location: article.userId?.location || 'Sin ubicación',
+            location: article.location || article.userId?.location || 'Sin ubicación',
             title: article.title,
             description: article.description,
             category: article.category,
             condition: article.condition,
             wantsFor: article.wantsFor,
-            image: article.image
+            image: article.image,
+            price: article.price || 0,
+            features: article.features || '',
+            sellerPlan: article.sellerPlan || 'free'
         }, { status: 200 });
     } catch (error) {
         console.error('Error fetching article:', error);
@@ -50,7 +53,19 @@ export async function PUT(
         const resolvedParams = await params;
         const body = await request.json();
 
-        const updatedArticle = await Article.findByIdAndUpdate(resolvedParams.id, body, {
+        const updateBody = {
+            title: body.title,
+            description: body.description,
+            category: body.category,
+            condition: body.condition,
+            wantsFor: body.wantsFor,
+            image: body.image,
+            location: body.location,
+            price: body.price !== undefined ? Number(body.price) : undefined,
+            features: body.features,
+        }
+
+        const updatedArticle = await Article.findByIdAndUpdate(resolvedParams.id, updateBody, {
             new: true,
             runValidators: true,
         }).populate('userId', 'name location');
@@ -69,13 +84,16 @@ export async function PUT(
                     id: updatedArticle._id.toString(),
                     userId: updatedArticle.userId?._id?.toString ? updatedArticle.userId._id.toString() : (updatedArticle.userId ? updatedArticle.userId.toString() : ''),
                     user: updatedArticle.userId?.name || 'Usuario',
-                    location: updatedArticle.userId?.location || 'Sin ubicación',
+                    location: updatedArticle.location || updatedArticle.userId?.location || 'Sin ubicación',
                     title: updatedArticle.title,
                     description: updatedArticle.description,
                     category: updatedArticle.category,
                     condition: updatedArticle.condition,
                     wantsFor: updatedArticle.wantsFor,
                     image: updatedArticle.image,
+                    price: updatedArticle.price || 0,
+                    features: updatedArticle.features || '',
+                    sellerPlan: updatedArticle.sellerPlan || 'free',
                 }
             },
             { status: 200 }

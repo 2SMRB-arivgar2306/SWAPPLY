@@ -16,14 +16,23 @@ export default function Home() {
   const [isChecking, setIsChecking] = useState(true)
   const [searchTerm, setSearchTerm] = useState("")
   const [selectedCategory, setSelectedCategory] = useState("all")
+  const [filterCity, setFilterCity] = useState("all")
+  const [filterCondition, setFilterCondition] = useState("all")
+  const [minPrice, setMinPrice] = useState("")
+  const [maxPrice, setMaxPrice] = useState("")
 
   useEffect(() => {
     const storedUser = localStorage.getItem("user")
     if (storedUser) {
-      setUser(JSON.parse(storedUser))
+      const parsedUser = JSON.parse(storedUser)
+      setUser(parsedUser)
+      if (!parsedUser.plan) {
+        router.push("/auth/select-plan")
+        return
+      }
     }
     setIsChecking(false)
-  }, [])
+  }, [router])
 
   const handlePublish = () => {
     router.push("/publicar")
@@ -81,8 +90,24 @@ export default function Home() {
         setSearchTerm={setSearchTerm}
         selectedCategory={selectedCategory}
         setSelectedCategory={setSelectedCategory}
+        plan={user?.plan || "free"}
+        filterCity={filterCity}
+        setFilterCity={setFilterCity}
+        filterCondition={filterCondition}
+        setFilterCondition={setFilterCondition}
+        minPrice={minPrice}
+        setMinPrice={setMinPrice}
+        maxPrice={maxPrice}
+        setMaxPrice={setMaxPrice}
       />
-      <ProductGrid searchTerm={searchTerm} selectedCategory={selectedCategory} />
+      <ProductGrid
+        searchTerm={searchTerm}
+        selectedCategory={selectedCategory}
+        filterCity={filterCity}
+        filterCondition={filterCondition}
+        minPrice={minPrice}
+        maxPrice={maxPrice}
+      />
 
       <button
         onClick={handlePublish}

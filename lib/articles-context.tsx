@@ -12,11 +12,15 @@ export interface Article {
   condition: string
   wantsFor: string
   image: string
+  price: number
+  location: string
+  features: string
+  sellerPlan?: string
 }
 
 interface ArticlesContextType {
   articles: Article[]
-  addArticle: (article: Omit<Article, 'id'> & { userId?: string }) => Promise<boolean>
+  addArticle: (article: Omit<Article, 'id'> & { userId?: string; sellerPlan?: string }) => Promise<boolean>
   updateArticle: (id: string | number, article: Partial<Article>) => Promise<boolean>
   deleteArticle: (id: string | number) => Promise<boolean>
   getArticleById: (id: string | number) => Article | undefined

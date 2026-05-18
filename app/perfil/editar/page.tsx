@@ -232,15 +232,29 @@ export default function EditarPerfilPage() {
             <label htmlFor="location" className="block text-sm font-medium text-foreground mb-2">
               Ubicación
             </label>
-            <input
+            <select
               id="location"
-              type="text"
               name="location"
               value={formData.location}
               onChange={handleChange}
-              placeholder="Tu ciudad"
               className="w-full px-4 py-3 bg-card border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-accent transition-colors"
-            />
+            >
+              <option value="">Selecciona tu ciudad</option>
+              <option value="Madrid">Madrid</option>
+              <option value="Barcelona">Barcelona</option>
+              <option value="Valencia">Valencia</option>
+              <option value="Sevilla">Sevilla</option>
+              <option value="Zaragoza">Zaragoza</option>
+              <option value="Málaga">Málaga</option>
+              <option value="Murcia">Murcia</option>
+              <option value="Palma">Palma</option>
+              <option value="Las Palmas">Las Palmas</option>
+              <option value="Bilbao">Bilbao</option>
+              <option value="Alicante">Alicante</option>
+              <option value="Córdoba">Córdoba</option>
+              <option value="Granada">Granada</option>
+              <option value="Oviedo">Oviedo</option>
+            </select>
           </div>
 
           <button

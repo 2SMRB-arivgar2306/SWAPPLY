@@ -19,6 +19,9 @@ export default function PublicarPage() {
     condition: "",
     wantsFor: "",
     image: "",
+    price: "",
+    location: "",
+    features: "",
   })
   const [imagePreview, setImagePreview] = useState<string>("")
   const [loading, setLoading] = useState(false)
@@ -69,6 +72,10 @@ export default function PublicarPage() {
       condition: formData.condition,
       wantsFor: formData.wantsFor,
       image: formData.image || "/placeholder.svg",
+      price: parseFloat(formData.price) || 0,
+      location: formData.location,
+      features: formData.features,
+      sellerPlan: user.plan || "free",
     })
 
     if (saved) {
@@ -221,6 +228,71 @@ export default function PublicarPage() {
               onChange={handleChange}
               placeholder="Ej: Busco videojuegos"
               required
+              className="w-full px-4 py-3 bg-card border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-accent transition-colors"
+            />
+          </div>
+
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <div>
+              <label htmlFor="location" className="block text-sm font-medium text-foreground mb-2">
+                Ciudad
+              </label>
+              <select
+                id="location"
+                name="location"
+                value={formData.location}
+                onChange={handleChange}
+                required
+                className="w-full px-4 py-3 bg-card border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-accent transition-colors"
+              >
+                <option value="">Selecciona la ciudad</option>
+                <option value="Madrid">Madrid</option>
+                <option value="Barcelona">Barcelona</option>
+                <option value="Valencia">Valencia</option>
+                <option value="Sevilla">Sevilla</option>
+                <option value="Zaragoza">Zaragoza</option>
+                <option value="Málaga">Málaga</option>
+                <option value="Murcia">Murcia</option>
+                <option value="Palma">Palma</option>
+                <option value="Las Palmas">Las Palmas</option>
+                <option value="Bilbao">Bilbao</option>
+                <option value="Alicante">Alicante</option>
+                <option value="Córdoba">Córdoba</option>
+                <option value="Valladolid">Valladolid</option>
+                <option value="Vigo">Vigo</option>
+                <option value="Gijón">Gijón</option>
+                <option value="Granada">Granada</option>
+              </select>
+            </div>
+
+            <div>
+              <label htmlFor="price" className="block text-sm font-medium text-foreground mb-2">
+                Precio
+              </label>
+              <input
+                id="price"
+                name="price"
+                type="number"
+                min="0"
+                value={formData.price}
+                onChange={handleChange}
+                placeholder="Ej: 10"
+                className="w-full px-4 py-3 bg-card border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-accent transition-colors"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label htmlFor="features" className="block text-sm font-medium text-foreground mb-2">
+              Características
+            </label>
+            <textarea
+              id="features"
+              name="features"
+              value={formData.features}
+              onChange={handleChange}
+              placeholder="Añade detalles como color, tamaño, marca o cualquier característica relevante"
+              rows={3}
               className="w-full px-4 py-3 bg-card border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-accent transition-colors"
             />
           </div>
