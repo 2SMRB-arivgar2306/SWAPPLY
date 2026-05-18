@@ -43,6 +43,10 @@ export default function ProfilePage() {
     router.push("/favorites")
   }
 
+  const handlePlanChange = () => {
+    router.push("/auth/select-plan")
+  }
+
   const handleLogout = () => {
     localStorage.removeItem("user")
     window.location.href = "/auth/login"
@@ -133,6 +137,12 @@ export default function ProfilePage() {
             className="w-full bg-accent/10 border border-accent/20 hover:bg-accent/20 text-accent font-semibold py-3 rounded-xl transition-all"
           >
             {dict.profile.editProfile}
+          </button>
+          <button
+            onClick={handlePlanChange}
+            className="w-full bg-accent text-accent-foreground hover:bg-accent/90 font-semibold py-3 rounded-xl transition-all"
+          >
+            Cambiar plan
           </button>
           <button
             onClick={handleMyItems}

@@ -1,5 +1,6 @@
 "use client"
 
+import { useEffect, useState } from "react"
 import { Search } from "lucide-react"
 
 const categories = [
@@ -69,9 +70,34 @@ export default function SearchBar({
   setMaxPrice: (value: string) => void
 }) {
   const premiumEnabled = plan === "premium"
+  const [isVisible, setIsVisible] = useState(true)
+
+  useEffect(() => {
+    let lastScrollY = window.scrollY
+    let ticking = false
+
+    const handleScroll = () => {
+      const scrollY = window.scrollY
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          if (scrollY > lastScrollY + 15 && scrollY > 100) {
+            setIsVisible(false)
+          } else if (scrollY < lastScrollY - 15) {
+            setIsVisible(true)
+          }
+          lastScrollY = scrollY
+          ticking = false
+        })
+        ticking = true
+      }
+    }
+
+    window.addEventListener("scroll", handleScroll)
+    return () => window.removeEventListener("scroll", handleScroll)
+  }, [])
 
   return (
-    <div className="bg-card border-b border-border sticky top-0 z-40">
+    <div className={`bg-card border-b border-border sticky top-0 z-40 transition-transform duration-300 ${isVisible ? "translate-y-0" : "-translate-y-full"}`}>
       <div className="max-w-7xl mx-auto px-4 py-6">
         <div className="grid gap-4 lg:grid-cols-[1fr_360px]">
           <div className="space-y-4">
