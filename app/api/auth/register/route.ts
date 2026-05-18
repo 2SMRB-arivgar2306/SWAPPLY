@@ -58,6 +58,7 @@ export async function POST(req: Request) {
         return NextResponse.json(
             {
                 message: 'Registro exitoso. Revisa tu correo para verificar tu cuenta.',
+                emailSent: !!emailSent,
                 user: {
                     id: user._id.toString(),
                     name: user.name,

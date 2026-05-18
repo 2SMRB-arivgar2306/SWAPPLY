@@ -13,6 +13,17 @@ const transporter = nodemailer.createTransport({
   },
 });
 
+export async function verifySMTP() {
+  try {
+    const info = await transporter.verify();
+    return { ok: true, info };
+  } catch (error) {
+    return { ok: false, error };
+  }
+}
+
+export { transporter };
+
 export async function sendVerificationEmail(email: string, name: string, code: string) {
   if (!process.env.SMTP_HOST || !process.env.SMTP_USER || !process.env.SMTP_PASS) {
     console.warn('SMTP configuration missing. Verification email not sent.');
