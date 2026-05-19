@@ -2,9 +2,47 @@ import { NextResponse } from 'next/server';
 import connectToDatabase from '@/lib/mongodb';
 import User from '@/models/User';
 import bcrypt from 'bcryptjs';
-// verification removed: email helper deleted
 
 export const dynamic = 'force-dynamic';
+
+async function sendWelcomeEmail(name: string, email: string) {
+    const serviceId = process.env.EMAILJS_SERVICE_ID;
+    const templateId = process.env.EMAILJS_TEMPLATE_ID;
+    const userId = process.env.EMAILJS_USER_ID || process.env.EMAILJS_PUBLIC_KEY;
+
+    if (!serviceId || !templateId || !userId) {
+        console.warn('EmailJS no está configurado en las variables de entorno. No se enviará el correo.');
+        return;
+    }
+
+    const payload: Record<string, unknown> = {
+        service_id: serviceId,
+        template_id: templateId,
+        template_params: {
+            user_name: name,
+            user_email: email,
+        },
+    };
+
+    if (process.env.EMAILJS_USER_ID) {
+        payload.user_id = userId;
+    } else {
+        payload.public_key = userId;
+    }
+
+    const response = await fetch('https://api.emailjs.com/api/v1.0/email/send', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+    });
+
+    if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`EmailJS error: ${response.status} ${response.statusText} - ${errorText}`);
+    }
+}
 
 export async function POST(req: Request) {
     try {
@@ -42,6 +80,12 @@ export async function POST(req: Request) {
             location: location || '',
             plan: '',
         });
+
+        try {
+            await sendWelcomeEmail(name, email);
+        } catch (emailError) {
+            console.error('EmailJS error:', emailError);
+        }
 
         return NextResponse.json(
             {
